@@ -1,12 +1,11 @@
 Package: gent
-Title: What the Package Does (One Line, Title Case)
+Title: Gene-based Association Testing.
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Noah", "Lorincz-Comi", , "noahlorinczcomi@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-0517-2499"))
+Description: This package provides functionality to perform gene-based association testing using GWAS summary statistics and a test which has a guaranteed null distribution, separating it from other gene-based association tests. We also introduce a gene-based test which can integrate xQTL information and provide causal inference under the assumptions of Mendelian Randomization and a set of multi-ancestry gene-based association and between-population comparison tests.
+License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2.9000
