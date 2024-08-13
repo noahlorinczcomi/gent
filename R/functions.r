@@ -14,22 +14,28 @@
 #'  \item \code{mu_h1}: observed statistic used to test H0.
 #'  \item \code{sigma2_h1}: variance of observed statistic used to test H0.
 #' }
-#' 
+#'
 #' @export
 #' @examples
 #' # Example for 5 SNPs
 #' LD=cov2cor(rWishart(1,100,diag(5))[,,1])
 #' z=c(mvnfast::rmvn(1,rep(0,5),diag(5)))
 #' gent(z,LD)
-gent=function(zs=NULL,LD,A=NULL,chisquares=NULL) {
+gent=function(zs=NULL,LD,A=NULL,xqtl_Z=NULL,chisquares=NULL) {
     # find null distribution
     if(is.null(A)) {
-        mu=nrow(LD)
-        trASAS=tr(LD%*%LD)
-    } else {
-        A=as.matrix(A)
-        mu=sum(diag(A%*%LD))
-        trASAS=tr(A%*%LD%*%A%*%LD)
+      mu=nrow(LD)
+      trASAS=tr(LD%*%LD)
+    } else if(!is.null(A) & is.null(eqtl_Z)){
+      A=as.matrix(A)
+      mu=sum(diag(A%*%LD))
+      trASAS=tr(A%*%LD%*%A%*%LD)
+    } else if(is.null(A) & !is.null(eqtl_Z)) {
+      eqtl_Z=as.matrix(eqtl_Z);m=nrow(eqtl_Z);p=ncol(eqtl_Z)
+      L=matrix(0,m,m);for(o in 1:p) L=L+eqtl_Z[,o]%*%t(eqtl_Z[,o])
+      L=L/sqrt(m*p)
+      mu=sum(diag(L%*%LD))
+      trASAS=tr(L%*%LD%*%L%*%LD)
     }
     sigma2=2*trASAS
     beta=(mu/trASAS)/2
@@ -48,7 +54,7 @@ gent=function(zs=NULL,LD,A=NULL,chisquares=NULL) {
 #' This function performs a gene-based association test using multiple populations.
 #' @param Z matrix of Z-statistics from GWAS. Rows are SNPs and columns are populations.
 #' @param ldlist list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}
-#' @return 
+#' @return
 #' \itemize {
 #' \item \code{pval}: P-value for testing H0: gene is not associated with trait.
 #' \item \code{shape}: shape parameter of null (Gamma) distribution.
@@ -118,7 +124,7 @@ multipop_anova=function(effect_size_matrix,standard_error_matrix) {
 #' This function performs a gene-based test of association heterogeneity across multiple populations/phenotypes.
 #' @param Z matrix of Z-statistics from GWAS. Rows are SNPs and columns are populations.
 #' @param ldlist list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}
-#' @return 
+#' @return
 #' \itemize {
 #' \item \code{pval}: P-value for testing H0: gene is not associated with trait.
 #' \item \code{shape}: shape parameter of null (Gamma) distribution.
@@ -153,15 +159,13 @@ mugent_ph=function(Z,ldlist) {
   lapply(out,c)
 }
 
-
-
 #' Multi-ancestry joint gene-based associated test (MuGenT-Pleio)
 #'
 #' This function performs a test of H1 that the gene is associated with in all populations/for all phenotypes.
 #' @param Z matrix of Z-statistics from GWAS. Rows are SNPs and columns are populations.
 #' @param ldlist list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}
-#' @param alpha the nominal (uncorrected) significance threshold for testing a single gene. If testing all genes genome-wide, this should be less than the threshold for testing a single gene. 
-#' @return 
+#' @param alpha the nominal (uncorrected) significance threshold for testing a single gene. If testing all genes genome-wide, this should be less than the threshold for testing a single gene.
+#' @return
 #' \itemize {
 #' \item \code{result}: An indication if H0 (the gene is not association in all populations/with all traits) can be rejected. 'Pleiotropy' if it is rejected and 'no pleiotropy' otherwise.
 #' \item \code{adjusted_significance_quantile}: The chi-square quantile of the adjusted nominal significance threshold for inferring H1 given the number of SNPs used and populations/traits tested.
@@ -216,11 +220,11 @@ mugent_sel=function(Z,ldlist,verbose=T) {
 #' This function can externally use PLINK to estimate the matrix of LD correlations between a set of SNPs.
 #' @param rsids vector of rsIDs for the SNPs you want to estimate LD between.
 #' @param effect_alleles effect alleles of the rsIDs from GWAS.
-#' @param ld_ref_file filename (without extension) of LD reference panel in PLINK (.bim/.bed/.fam) format. 
-#' @param writeable_directory a directory in which you have read-write access. Files will be created in this directory then deleted from it. 
+#' @param ld_ref_file filename (without extension) of LD reference panel in PLINK (.bim/.bed/.fam) format.
+#' @param writeable_directory a directory in which you have read-write access. Files will be created in this directory then deleted from it.
 #' @param plink_exec command to execute PLINK from the command line, typically just 'plink'.
 #' @param verbose should a statement about your effect alleles and those in the LD reference be printed to the console?
-#' @return 
+#' @return
 #' \itemize {
 #' \item \code{ld}: LD matrix. Rows and columns are in the original order provided to this function, filtered to only those present in the LD reference.
 #' \item \code{signmat}: This is a vector of +1s and -1s which indicate if your effect alleles did match (+1) or did not match (-1) the effect alleles in the LD reference panel. Effect alleles must match for later inference. If they don't simply multiply your Z-statistics, for SNPs present in the LD reference panel (see row/column names of \code{ld}), by \code{signment} element-wise.
@@ -233,22 +237,25 @@ mugent_sel=function(Z,ldlist,verbose=T) {
 #' ld_ref='~/1kg.v3/EUR'
 #' wd=getwd()
 #' ld(rs,ea,ld_ref,wd,plink_exec='plink',verbose=TRUE)
-ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),plink_exec='plink',verbose=T) {
+ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),plink_exec='plink',chromosome=NULL,need_bim=TRUE,verbose=T,temp_file_prefix='') {
     library(data.table);library(dplyr)
     if(is.null(ld_ref_file)) stop('you must specify an LD reference in PLINK format without file extension')
+  if(need_bim) {
     bf=paste0(ld_ref_file,'.bim')
     if(!file.exists(bf)) stop(paste0(bf,' does not exist but it must'))
-    bim=fread(bf) %>% as.data.frame(); colnames(bim)=c('chr','rsid','x','position','a1','a2')
+    bim=fread(bf) %>% as.data.frame();
+    colnames(bim)=c('chr','rsid','x','position','a1','a2')
+    if(!is.null(chromosome)) bim=bim %>% filter(chr %in% chromosome)
     ri=rsids[rsids %in% bim$rsid]
     ea=effect_alleles[rsids %in% bim$rsid]
     bim=bim %>% left_join(data.frame(rsid=ri,effect_allele=ea)) %>% arrange(rsid)
-    ix=sapply(r1,function(h) which(bim$rsid==h))
+    ix=sapply(ri,function(h) which(bim$rsid==h))
     bim=bim %>% arrange(position)
-    # calculate LD
+    # directly calculate LD
     setwd(writeable_directory)
-    rd=paste(sample(c(letters,1:10),20,replace=T),collapse='')
+    rd=temp_file_prefix
     write.table(bim$rsid,paste0(rd,'.txt'),row.names=F,quote=F,col.names=F)
-    cmd=paste0(plink_exec,' --bfile --r square --extract ',rd,'.txt --out ',rd)
+    cmd=paste0(plink_exec,' --bfile ',ld_ref_file,' --r square --extract ',rd,'.txt --out ',rd)
     oo=system(cmd,intern=T)
     ld=fread=paste0(rd,'.ld') %>% as.matrix()
     ld=ld[ix,ix]
@@ -259,4 +266,22 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
     out=list(ld=ld,signmat=signmat)
     if(verbose) cat('`signmat` is a vector of constants to multiple your Z-statistics by since their effect alleles did not match the A1 alleles in the .bim file')
     out
+  } else {
+    # directly calculate LD
+    setwd(writeable_directory)
+    rd=temp_file_prefix
+    write.table(rsids,paste0(rd,'.txt'),row.names=F,quote=F,col.names=F)
+    cmd=paste0(plink_exec,' --bfile ',ld_ref_file,' --r square --extract ',rd,'.txt --out ',rd)
+    oo=system(cmd,intern=T)
+    ld=fread(paste0(rd,'.ld')) %>% as.matrix()
+    oo=system(paste0('rm ',rd,'*'),intern=T)
+    out=list(ld=ld,signmat=rep(1,nrow(ld)))
+    colnames(out$ld)=rownames(out$ld)=rsids
+  }
+  return(out)
 }
+
+
+
+
+
