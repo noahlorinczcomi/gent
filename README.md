@@ -40,8 +40,8 @@ $sigma2_h1
 ```
 
 # (xGenT) Gene-based association test integrating xQTLs
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait and genetically correlated with local xQTLs,}}$
-$\color{blue}{\textsf{which is equivalent to Mendelian Randomization if its assumptions hold.}}$
+$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait and genetically}}$
+$\color{blue}{\textsf{correlated with local xQTLs, which is equivalent to Mendelian Randomization if its assumptions hold.}}$
 
 We show how to load our example data for the *RIPK2* gene and perform a gene-based association test integrating brain eQTLs with xGenT. Disease Z-statistics are from the Alzheimer's disease GWAS by Bellenguez et al. (2022); eQTL Z-statistics are from GTEx v8 (https://gtexportal.org/home/) in cerebellum, spinal cord, frontal cortex, cortex, and hippocampal tissues; the LD matrix is estimated using 1000 Genomes Phase 3 European samples.
 ```
@@ -104,7 +104,8 @@ $sigma2_h0
 ```
 
 # (MuGenT-PH) Multi-ancestry gene-based test of association heterogeneity
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait at varying magnitudes across populations.}}$
+$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait at varying magnitudes}}$
+$\color{blue}{\textsf{across populations.}}$
 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of association heterogeneity with type 2 diabetes (T2D) across multiple populations. T2D  Z-statistics are from the GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
