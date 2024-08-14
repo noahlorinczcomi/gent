@@ -5,7 +5,7 @@ devtools::install_github('noahlorinczcomi/gent')
 remotes::install_github('noahlorinczcomi/gent')
 ```
 # Preliminaries
-All gene-based association test methods [```gent()```, ```mugent()```, ```mugent_ph()```, ```mugent_pleio()```,```mugent_sel()```] require estimated LD matrices for a set of SNPs from PLINK-formatted .bed/.bim/.fam files. The effect allele in your GWAS must be the ```a1``` allele in the reference file. If it is not for a particular SNP, simply multiple the GWAS beta or Z-statistic by -1 (negative one).
+All gene-based association test methods [```gent()```, ```mugent()```, ```mugent_ph()```, ```mugent_pleio()```,```mugent_sel()```] require estimated LD matrices for a set of SNPs. The effect allele in your GWAS must be the effective allele allele in the reference file (e.g., the ```a1``` allele in PLINK-formatted .bim files). If it is not for a particular SNP, simply multiple the GWAS beta or Z-statistic by -1 (negative one).
 
 # (GenT) Gene-based association test
 $\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait.}}$
