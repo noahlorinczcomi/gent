@@ -4,7 +4,7 @@ devtools::install_github('noahlorinczcomi/gent')
 # or
 remotes::install_github('noahlorinczcomi/gent')
 ```
-# Preliminaries
+# Preliminary note about LD
 All gene-based association test methods [```gent()```, ```mugent()```, ```mugent_ph()```, ```mugent_pleio()```,```mugent_sel()```] require estimated LD matrices for a set of SNPs. The effect allele in your GWAS must be the same as the dosage allele in the reference file (e.g., the ```a1``` allele in PLINK-formatted .bim files; the counts of which are recorded as values in the corresponding .bed file). If it is not for a particular SNP, simply multiple the GWAS beta or Z-statistic by -1 (negative one).
 
 # (GenT) Gene-based association test
