@@ -49,7 +49,7 @@ We show how to load our example data for the *RIPK2* gene and perform a gene-bas
 library(gent)
 data=readRDS('example_xGenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
 ad_z=data$ad_z # (vector) Z-statistics for 58 SNPs from the AD GWAS
-eqtl_z=data$eqtl_z # (matrix) Z-statistics for same 58 SNPs for gene expression association
+eqtl_z=data$eqtl_z # (matrix) Z-statistics for same 58 SNPs (allele-harmonized) for gene expression association
 LD=data$LD # (matrix) LD matrix for 58 SNPs
 results=gent(ad_z,LD,xqtl_Z=eqtl_z) # adding `xqtl_Z` weighting matrix makes it xGenT
 
@@ -83,7 +83,7 @@ We show how to load our example data for the *PPP3CA* gene and perform a gene-ba
 ```
 library(gent)
 data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
-t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS
+t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized)
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs
 results=mugent(t2d_z,LD_list)
 
@@ -111,7 +111,7 @@ We show how to load our example data for the *PPP3CA* gene and perform a gene-ba
 ```
 library(gent)
 data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
-t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS
+t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized)
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs
 results=mugent_ph(t2d_z,LD_list)
 
@@ -139,7 +139,7 @@ We show how to load our example data for the *PPP3CA* gene and perform a gene-ba
 ```
 library(gent)
 data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
-t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS
+t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized)
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs
 results=mugent_pleio(t2d_z,LD_list)
 
