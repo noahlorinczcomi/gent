@@ -8,7 +8,7 @@ remotes::install_github('noahlorinczcomi/gent')
 All gene-based association test methods [```gent()```, ```mugent()```, ```mugent_ph()```, ```mugent_pleio()```,```mugent_sel()```] require estimated LD matrices for a set of SNPs. The effect allele in your GWAS must be the same as the dosage allele in the reference file (e.g., the ```a1``` allele in PLINK-formatted .bim files; the counts of which are recorded as values in the corresponding .bed file). If it is not for a particular SNP, simply multiple the GWAS beta or Z-statistic by -1 (negative one).
 
 # (GenT) Gene-based association test
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait.}}$
+This tests the **null** hypothesis that the gene is **not** associated with the disease trait.
 
 We show how to load our example data for the *SYK* gene and perform a gene-based association test with GenT. Z-statistics are from the Alzheimer's disease (AD) GWAS by Bellenguez et al. (2022) and the LD matrix is estimated using 1000 Genomes Phase 3 European samples.
 ```
@@ -42,8 +42,7 @@ $sigma2_h1
 ```
 
 # (xGenT) Gene-based association test integrating xQTLs
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait and genetically}}$
-$\color{blue}{\textsf{correlated with local xQTLs, which is equivalent to Mendelian Randomization if its assumptions hold.}}$
+This tests the **null** hypothesis that the gene is either **not** associated with the disease trait or **not** genetically correlated with local xQTLs, which is equivalent to Mendelian Randomization if its assumptions about horizontal pleiotropy hold.
 
 We show how to load our example data for the *RIPK2* gene and perform a gene-based association test integrating brain eQTLs with xGenT. Disease Z-statistics are from the Alzheimer's disease GWAS by Bellenguez et al. (2022); eQTL Z-statistics are from GTEx v8 (https://gtexportal.org/home/) in cerebellum, spinal cord, frontal cortex, cortex, and hippocampal tissues; the LD matrix is estimated using 1000 Genomes Phase 3 European samples.
 ```
@@ -78,7 +77,7 @@ $sigma2_h1
 ```
 
 # (MuGenT) Multi-ancestry gene-based association test
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait in any population.}}$
+This tests the **null** hypothesis that the gene is **not** associated with the disease trait in any population.
 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of association with type 2 diabetes (T2D) integrating GWAS data from African American (AFA), East and South Asian (EAS, SAS), European (EUR), and Hispanic (HIS) populations. T2D Z-statistics are from GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
@@ -106,8 +105,7 @@ $sigma2_h0
 ```
 
 # (MuGenT-PH) Multi-ancestry gene-based test of association heterogeneity
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait at varying magnitudes}}$
-$\color{blue}{\textsf{across populations.}}$
+This tests the **null** hypothesis that the gene is **not** associated with the disease trait at varying magnitudes across populations.
 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of association heterogeneity with type 2 diabetes (T2D) across multiple populations. T2D  Z-statistics are from the GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
@@ -135,7 +133,7 @@ $sigma2_h0
 ```
 
 # (MuGenT-Pleio) Multi-ancestry gene-based test of pleiotropic association with all populations
-$\color{blue}{\textsf{This tests the alternative hypothesis that the gene is associated with the disease trait in all populations.}}$
+This tests the **null** hypothesis that the gene is **not** associated with the disease trait in all populations.
 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of pleiotropy across multiple  populations for type 2 diabetes (T2D). T2D  Z-statistics are from the GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
