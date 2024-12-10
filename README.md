@@ -111,7 +111,7 @@ We show how to load our example data for the *PPP3CA* gene and perform a gene-ba
 ```
 library(gent)
 data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
-t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized)
+t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized) for PPP3CA gene
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs (allele-harmonized)
 results=mugent_ph(t2d_z,LD_list)
 
@@ -139,7 +139,7 @@ We show how to load our example data for the *PPP3CA* gene and perform a gene-ba
 ```
 library(gent)
 data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
-t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized)
+t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized) for PPP3CA gene
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs (allele-harmonized)
 results=mugent_pleio(t2d_z,LD_list)
 
