@@ -1,5 +1,3 @@
-# Preprint
-Lorincz-Comi, Noah and Song, Wenqiang and Chen, Xin and Rivera Paz, Isabela and Hou, Yuan and Zhou, Yadi and Xu, Jielin and Martin, William and Barnard, John and Pieper, Andrew A. and Haines, Jonathan L. and Chung, Mina and Cheng, Feixiong. Combining xQTL and Genome-Wide Association Studies from Ethnically Diverse Populations Improves Druggable Gene Discovery. Available at SSRN: http://dx.doi.org/10.2139/ssrn.5080346 
 # Installation
 ```
 devtools::install_github('noahlorinczcomi/gent')
