@@ -23,16 +23,16 @@
 #' gent(z,LD)
 gent=function(zs=NULL,LD,A=NULL,xqtl_Z=NULL,chisquares=NULL) {
     # find null distribution
-    if(is.null(A)) {
+    if(is.null(A) & is.null(xqtl_Z)) {
       mu=nrow(LD)
       trASAS=tr(LD%*%LD)
-    } else if(!is.null(A) & is.null(eqtl_Z)){
+    } else if(!is.null(A) & is.null(xqtl_Z)){
       A=as.matrix(A)
       mu=sum(diag(A%*%LD))
       trASAS=tr(A%*%LD%*%A%*%LD)
-    } else if(is.null(A) & !is.null(eqtl_Z)) {
-      eqtl_Z=as.matrix(eqtl_Z);m=nrow(eqtl_Z);p=ncol(eqtl_Z)
-      L=matrix(0,m,m);for(o in 1:p) L=L+eqtl_Z[,o]%*%t(eqtl_Z[,o])
+    } else if(is.null(A) & !is.null(xqtl_Z)) {
+      xqtl_Z=as.matrix(xqtl_Z);m=nrow(xqtl_Z);p=ncol(xqtl_Z)
+      L=matrix(0,m,m);for(o in 1:p) L=L+xqtl_Z[,o]%*%t(xqtl_Z[,o])
       L=L/sqrt(m*p)
       mu=sum(diag(L%*%LD))
       trASAS=tr(L%*%LD%*%L%*%LD)
