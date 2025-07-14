@@ -3,6 +3,7 @@
 #' This function performs a single gene-based association test.
 #' @param zs vector of SNP-specific Z-statistics from GWAS whose indices correspond to those of \code{LD}
 #' @param LD LD matrix whose row/column indices correspond to the indices of \code{zs}
+#' @param mafs Minor allele frequencies of the SNPs whose Z-statistics are in \code{zs} (in corresponding order). If non-null, inverse 2MAF(1-MAF) weights will be aplied.
 #' @param chisquares if you instead give chi-square statistics (squared Z-statistics), supply them here and leave \code{zs} empty
 #' @return A list with these components:
 #' \itemize{
@@ -21,16 +22,27 @@
 #' LD=cov2cor(rWishart(1,100,diag(5))[,,1])
 #' z=c(mvnfast::rmvn(1,rep(0,5),diag(5)))
 #' gent(z,LD)
-gent=function(zs=NULL,LD,A=NULL,xqtl_Z=NULL,chisquares=NULL) {
+gent=function(zs=NULL,LD,mafs=NULL,xqtl_Z=NULL,chisquares=NULL) {
     # find null distribution
-    if(is.null(A) & is.null(xqtl_Z)) {
+    if(is.null(mafs) & is.null(xqtl_Z)) {
       mu=nrow(LD)
       trASAS=tr(LD%*%LD)
-    } else if(!is.null(A) & is.null(xqtl_Z)){
-      A=as.matrix(A)
+    } else if(!is.null(mafs) & is.null(xqtl_Z)){
+     # if the analysis is MAF-weighted, return early
+      mafs=c(mafs)
+      if(length(mafs)!=length(zs)) stop('length of MAF vector not equal to length of Z-statistic vector')
+      mafs=2*mafs*(1-mafs)
+      A=diag(1/mafs))
       mu=sum(diag(A%*%LD))
       trASAS=tr(A%*%LD%*%A%*%LD)
-    } else if(is.null(A) & !is.null(xqtl_Z)) {
+      mu_1=sum(diag(A%*%LD))+t(zs)%*%A%*%zs
+      sigma2_h1=2*trASAS+4*t(zs)%*%A%*%LD%*%A%*%zs
+      beta=mu/(2*trASAS)
+      alpha=beta*mu
+      y=c(t(zs)%*%A%*%zs)
+      pval=pgamma(y,shape=alpha,rate=beta,lower.tail=FALSE)
+      return(pval=pval,shape=alpha,rate=beta,mu_h0=mu,sigma2_h0=2*trASAS,mu_h1=mu_h1,sigma2_h1=sigma2_h1)
+    } else if(is.null(mafs) & !is.null(xqtl_Z)) {
       xqtl_Z=as.matrix(xqtl_Z);m=nrow(xqtl_Z);p=ncol(xqtl_Z)
       L=matrix(0,m,m);for(o in 1:p) L=L+xqtl_Z[,o]%*%t(xqtl_Z[,o])
       L=L/sqrt(m*p)
