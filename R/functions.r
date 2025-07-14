@@ -41,7 +41,7 @@ gent=function(zs=NULL,LD,mafs=NULL,xqtl_Z=NULL,chisquares=NULL) {
       alpha=beta*mu
       y=c(t(zs)%*%A%*%zs)
       pval=pgamma(y,shape=alpha,rate=beta,lower.tail=FALSE)
-      return(pval=pval,shape=alpha,rate=beta,mu_h0=mu,sigma2_h0=2*trASAS,mu_h1=mu_h1,sigma2_h1=sigma2_h1)
+      return(list(pval=pval,shape=alpha,rate=beta,mu_h0=mu,sigma2_h0=2*trASAS,mu_h1=mu_h1,sigma2_h1=sigma2_h1))
     } else if(is.null(mafs) & !is.null(xqtl_Z)) {
       xqtl_Z=as.matrix(xqtl_Z);m=nrow(xqtl_Z);p=ncol(xqtl_Z)
       L=matrix(0,m,m);for(o in 1:p) L=L+xqtl_Z[,o]%*%t(xqtl_Z[,o])
