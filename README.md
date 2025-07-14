@@ -56,6 +56,7 @@ LD=data$LD # (matrix) LD matrix for the 805 SNPs (allele-harmonized)
 maf=data$maf # minor allele frequencies for the 805 SNPs (provided by the Bellenguez et al. GWAS)
 results=gent(z,LD,mafs=maf)
 
+print(results)
 $pval
 [1] 0.1383514
 
