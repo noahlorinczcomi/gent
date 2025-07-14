@@ -32,7 +32,7 @@ gent=function(zs=NULL,LD,mafs=NULL,xqtl_Z=NULL,chisquares=NULL) {
       mafs=c(mafs)
       if(length(mafs)!=length(zs)) stop('length of MAF vector not equal to length of Z-statistic vector')
       mafs=2*mafs*(1-mafs)
-      A=diag(1/mafs))
+      A=diag(1/mafs)
       mu=sum(diag(A%*%LD))
       trASAS=tr(A%*%LD%*%A%*%LD)
       mu_1=sum(diag(A%*%LD))+t(zs)%*%A%*%zs
