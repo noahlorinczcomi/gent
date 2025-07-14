@@ -35,7 +35,7 @@ gent=function(zs=NULL,LD,mafs=NULL,xqtl_Z=NULL,chisquares=NULL) {
       A=diag(1/mafs)
       mu=sum(diag(A%*%LD))
       trASAS=tr(A%*%LD%*%A%*%LD)
-      mu_1=sum(diag(A%*%LD))+t(zs)%*%A%*%zs
+      mu_h1=sum(diag(A%*%LD))+t(zs)%*%A%*%zs
       sigma2_h1=2*trASAS+4*t(zs)%*%A%*%LD%*%A%*%zs
       beta=mu/(2*trASAS)
       alpha=beta*mu
