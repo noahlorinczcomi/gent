@@ -22,43 +22,55 @@
 #' LD=cov2cor(rWishart(1,100,diag(5))[,,1])
 #' z=c(mvnfast::rmvn(1,rep(0,5),diag(5)))
 #' gent(z,LD)
-gent=function(zs=NULL,LD,mafs=NULL,xqtl_Z=NULL,chisquares=NULL) {
-    # find null distribution
-    if(is.null(mafs) & is.null(xqtl_Z)) {
-      mu=nrow(LD)
-      trASAS=tr(LD%*%LD)
-    } else if(!is.null(mafs) & is.null(xqtl_Z)){
-     # if the analysis is MAF-weighted, return early
-      mafs=c(mafs)
-      if(length(mafs)!=length(zs)) stop('length of MAF vector not equal to length of Z-statistic vector')
-      mafs=2*mafs*(1-mafs)
-      A=diag(1/mafs)
-      mu=sum(diag(A%*%LD))
-      trASAS=tr(A%*%LD%*%A%*%LD)
-      mu_h1=sum(diag(A%*%LD))+t(zs)%*%A%*%zs
-      sigma2_h1=2*trASAS+4*t(zs)%*%A%*%LD%*%A%*%zs
-      beta=mu/(2*trASAS)
-      alpha=beta*mu
-      y=c(t(zs)%*%A%*%zs)
-      pval=pgamma(y,shape=alpha,rate=beta,lower.tail=FALSE)
-      return(list(pval=pval,shape=alpha,rate=beta,mu_h0=mu,sigma2_h0=2*trASAS,mu_h1=mu_h1,sigma2_h1=sigma2_h1))
-    } else if(is.null(mafs) & !is.null(xqtl_Z)) {
-      xqtl_Z=as.matrix(xqtl_Z);m=nrow(xqtl_Z);p=ncol(xqtl_Z)
-      L=matrix(0,m,m);for(o in 1:p) L=L+xqtl_Z[,o]%*%t(xqtl_Z[,o])
-      L=L/sqrt(m*p)
-      mu=sum(diag(L%*%LD))
-      trASAS=tr(L%*%LD%*%L%*%LD)
+gent=function (zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL) {
+    if (is.null(mafs) & is.null(xqtl_Z)) {
+        mu = nrow(LD)
+        trASAS = tr(LD %*% LD)
     }
-    sigma2=2*trASAS
-    beta=(mu/trASAS)/2
-    alpha=beta*mu
-    # P-values for zs (should be in LD)
-    if(!is.null(chisquares)) y=sum(chisquares) else y=sum(zs^2)
-    mu_h1=mu+y
-    if(!is.null(zs)) sigma2_h1=sigma2+4*t(zs)%*%LD%*%zs else sigma2_h1=NULL
-    pval=pgamma(y,shape=alpha,rate=beta,lower.tail=FALSE)
-    out=list(pval=pval,shape=alpha,rate=beta,mu_h0=mu,sigma2_h0=sigma2,mu_h1=mu_h1,sigma2_h1=sigma2_h1)
-    lapply(out,c)
+    else if (!is.null(mafs) & is.null(xqtl_Z)) {
+        mafs = c(mafs)
+        if (length(mafs) != length(zs))
+            stop("length of MAF vector not equal to length of Z-statistic vector")
+        mafs = 2 * mafs * (1 - mafs)
+        A = diag(1/mafs)
+        mu = sum(diag(A %*% LD))
+        trASAS = tr(A %*% LD %*% A %*% LD)
+        sigma2 = 2 * trASAS
+        mu_h1 = mu + t(zs) %*% A %*% zs
+        sigma2_h1 = sigma2 + 4 * t(zs) %*% A %*% LD %*% A %*% zs
+        beta = mu/sigma2
+        alpha = mu * beta
+        y = c(t(zs) %*% A %*% zs)
+        pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
+        out=list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
+            sigma2_h0 = sigma2, mu_h1 = mu_h1, sigma2_h1 = sigma2_h1)
+        out=lapply(out,c)
+        return(out)
+    }
+    else if (is.null(mafs) & !is.null(xqtl_Z)) {
+        xqtl_Z = as.matrix(xqtl_Z)
+        m = nrow(xqtl_Z)
+        p = ncol(xqtl_Z)
+        L = matrix(0, m, m)
+        for (o in 1:p) L = L + xqtl_Z[, o] %*% t(xqtl_Z[, o])
+        L = L/sqrt(m * p)
+        mu = sum(diag(L %*% LD))
+        trASAS = tr(L %*% LD %*% L %*% LD)
+    }
+    sigma2 = 2 * trASAS
+    beta = (mu/trASAS)/2
+    alpha = beta * mu
+    if (!is.null(chisquares))
+        y = sum(chisquares)
+    else y = sum(zs^2)
+    mu_h1 = mu + y
+    if (!is.null(zs))
+        sigma2_h1 = sigma2 + 4 * t(zs) %*% LD %*% zs
+    else sigma2_h1 = NULL
+    pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
+    out = list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
+        sigma2_h0 = sigma2, mu_h1 = mu_h1, sigma2_h1 = sigma2_h1)
+    lapply(out, c)
 }
 
 #' Multi-ancestry gene-based association test (MuGenT)
