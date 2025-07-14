@@ -79,13 +79,13 @@ $sigma2_h1
 [1] 21176370
 ```
 
-Since the MAF-unweighted analyis P-value is significantly smaller than the inverse MAF-weighted analysis, *common* variants may explain the observed association between *SYK* and AD. We can check this (approximately) by calculating the empirical rank correlation between MAF and absolute effect size:
+Since the MAF-unweighted analyis P-value is significantly smaller than the inverse MAF-weighted analysis, *common* variants may explain the observed association between *SYK* and AD. We can check this (approximately) by calculating the empirical rank correlation between MAF and absolute Z-statistics:
 ```
 cor(abs(data$z), data$maf, method='spearman')
 [1] 0.3744167
 ```
 
-The positive correlation confirms that common variants in the *SYK* locus generally have larger absolute marginal effect sizes than rarer variants.
+The positive correlation confirms that common variants in the *SYK* locus generally have larger absolute marginal Z-statistics (effect size / standard error) than rarer variants.
 
 # (xGenT) Gene-based association test integrating xQTLs
 This tests the **null** hypothesis that the gene is either **not** associated with the disease trait or **not** genetically correlated with local xQTLs, which is equivalent to Mendelian Randomization if its assumptions about horizontal pleiotropy hold.
