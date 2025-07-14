@@ -16,7 +16,7 @@ This tests the **null** hypothesis that the gene is **not** associated with the 
 We show how to load our example data for the *SYK* gene and perform a gene-based association test with GenT. Z-statistics are from the Alzheimer's disease (AD) GWAS by Bellenguez et al. (2022) and the LD matrix is estimated using 1000 Genomes Phase 3 European samples.
 ```
 library(gent)
-data=readRDS('example_GenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
+data=readRDS('example_GenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data/example_GenT_data.Rds
 z=data$z # (vector) AD Z-statistics for 805 SNPs corresponding to SYK gene
 LD=data$LD # (matrix) LD matrix for the 805 SNPs (allele-harmonized)
 results=gent(z,LD)
@@ -43,6 +43,48 @@ $mu_h1
 $sigma2_h1
 [1] 316919.3
 ```
+
+# (GenT + MAF weighting) Gene-based association test using inverse minor allele frequency (MAF) weights
+This tests the **null** hypothesis that the gene is **not** associated with the disease trait using a weighted statistic. Weights are SNP-specific and are equal to the inverse of the variance of the SNP genotype, i.e., 2*MAF(1-MAF).
+
+We show how to load our example data for the *SYK* gene and perform a gene-based association test with GenT. Z-statistics are from the Alzheimer's disease (AD) GWAS by Bellenguez et al. (2022) and the LD matrix is estimated using 1000 Genomes Phase 3 European samples. Minor allele frequencies 
+```
+library(gent)
+data=readRDS('example_GenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data/example_GenT_data.Rds
+z=data$z # (vector) AD Z-statistics for 805 SNPs corresponding to SYK gene
+LD=data$LD # (matrix) LD matrix for the 805 SNPs (allele-harmonized)
+maf=data$maf # minor allele frequencies for the 805 SNPs (provided by the Bellenguez et al. GWAS)
+results=gent(z,LD,mafs=maf)
+
+$pval
+[1] 0.1383514
+
+$shape
+[1] 10.48576
+
+$rate
+[1] 0.00107883
+
+$mu_h0
+[1] 9719.571
+
+$sigma2_h0
+[1] 9009364
+
+$mu_h1
+[1] 22710.71
+
+$sigma2_h1
+[1] 21176370
+```
+
+Since the MAF-unweighted analyis P-value is significantly smaller than the inverse MAF-weighted analysis, *common* variants may explain the observed association between *SYK* and AD. We can check this (approximately) by calculating the empirical rank correlation between MAF and absolute effect size:
+```
+cor(abs(data$z), data$maf, method='spearman')
+[1] 0.3744167
+```
+
+The positive correlation confirms that common variants in the *SYK* locus generally have larger absolute marginal effect sizes than rarer variants.
 
 # (xGenT) Gene-based association test integrating xQTLs
 This tests the **null** hypothesis that the gene is either **not** associated with the disease trait or **not** genetically correlated with local xQTLs, which is equivalent to Mendelian Randomization if its assumptions about horizontal pleiotropy hold.
