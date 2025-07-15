@@ -45,7 +45,7 @@ $sigma2_h1
 ```
 
 # (GenT + MAF weighting) Gene-based association test using inverse minor allele frequency (MAF) weights
-This tests the **null** hypothesis that the gene is **not** associated with the disease trait using a weighted statistic. Weights are SNP-specific and are equal to the inverse of the variance of the SNP genotype, i.e., 2*MAF(1-MAF).
+This tests the **null** hypothesis that the gene is **not** associated with the disease trait using a weighted statistic. Weights are SNP-specific and are equal to the inverse of the variance of the SNP genotype, i.e., 2MAF(1-MAF).
 
 We show how to load our example data for the *SYK* gene and perform a gene-based association test with GenT. Z-statistics are from the Alzheimer's disease (AD) GWAS by Bellenguez et al. (2022) and the LD matrix is estimated using 1000 Genomes Phase 3 European samples. Minor allele frequencies 
 ```
@@ -85,7 +85,7 @@ cor(abs(data$z), data$maf, method='spearman')
 [1] 0.3744167
 ```
 
-The positive correlation confirms that common variants in the *SYK* locus generally have larger absolute marginal Z-statistics (effect size / standard error) than rarer variants.
+The positive correlation confirms that common variants in the *SYK* locus generally have larger absolute marginal Z-statistics (effect size / standard error) than rarer variants. Be cautious not to interpret Z-statistics as effect sizes, and recall that SNP chi-square statistics (squared Z-statistics) are proportional to 2MAF(1-MAF)+4MAF<sup>2</sup>. Hence this analysis usingn the rank correlation is not exact.
 
 # (xGenT) Gene-based association test integrating xQTLs
 This tests the **null** hypothesis that the gene is either **not** associated with the disease trait or **not** genetically correlated with local xQTLs, which is equivalent to Mendelian Randomization if its assumptions about horizontal pleiotropy hold.
