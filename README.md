@@ -44,12 +44,6 @@ $mu_h0
 
 $sigma2_h0
 [1] 51025.51
-
-$mu_h1
-[1] 3106.22
-
-$sigma2_h1
-[1] 316919.3
 ```
 
 # (xGenT) Gene-based association test integrating xQTLs
@@ -81,12 +75,6 @@ $mu_h0
 
 $sigma2_h0
 [1] 1764.487
-
-$mu_h1
-[1] 430.9083
-
-$sigma2_h1
-[1] 11732.78
 ```
 
 # (MuGenT) Multi-ancestry gene-based association test
