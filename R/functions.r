@@ -12,8 +12,6 @@
 #'  \item \code{rate}: rate parameter of null (Gamma) distribution.
 #'  \item \code{mu_h0}: expectation of null (Gamma) distribution.
 #'  \item \code{sigma2_h0}: variance of null (Gamma) distribution.
-#'  \item \code{mu_h1}: observed statistic used to test H0.
-#'  \item \code{sigma2_h1}: variance of observed statistic used to test H0.
 #' }
 #'
 #' @export
@@ -43,7 +41,7 @@ gent=function (zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL) {
         y = c(t(zs) %*% A %*% zs)
         pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
         out=list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
-            sigma2_h0 = sigma2, mu_h1 = mu_h1, sigma2_h1 = sigma2_h1)
+            sigma2_h0 = sigma2)
         out=lapply(out,c)
         return(out)
     }
@@ -69,7 +67,7 @@ gent=function (zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL) {
     else sigma2_h1 = NULL
     pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
     out = list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
-        sigma2_h0 = sigma2, mu_h1 = mu_h1, sigma2_h1 = sigma2_h1)
+        sigma2_h0 = sigma2)
     lapply(out, c)
 }
 
@@ -141,7 +139,6 @@ multipop_anova=function(effect_size_matrix,standard_error_matrix) {
   colnames(out)=c('ANOVA_pval','ANOVA_chisq')
   return(out)
 }
-
 
 #' Multi-ancestry gene-based association heterogeneity test (MuGenT-PH)
 #'
