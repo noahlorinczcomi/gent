@@ -20,8 +20,6 @@ gent(zs = NULL, LD, A = NULL, chisquares = NULL)
 \item \code{rate}: rate parameter of null (Gamma) distribution.
 \item \code{mu_h0}: expectation of null (Gamma) distribution.
 \item \code{sigma2_h0}: variance of null (Gamma) distribution.
-\item \code{mu_h1}: observed statistic used to test H0.
-\item \code{sigma2_h1}: variance of observed statistic used to test H0.
 }
 }
 \description{
