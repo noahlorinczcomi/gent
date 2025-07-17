@@ -29,21 +29,13 @@ z=data$z # (vector) AD Z-statistics for 805 SNPs corresponding to SYK gene
 LD=data$LD # (matrix) LD matrix for the 805 SNPs (allele-harmonized)
 results=gent(z,LD)
 
-print(results)
-$pval
-[1] 1.96426e-06
-
-$shape
-[1] 12.70002
-
-$rate
-[1] 0.01577642
-
-$mu_h0
-[1] 805
-
-$sigma2_h0
-[1] 51025.51
+str(results)
+List of 5
+ $ pval     : num 1.96e-06
+ $ shape    : num 12.7
+ $ rate     : num 0.0158
+ $ mu_h0    : int 805
+ $ sigma2_h0: num 51026
 ```
 
 # (xGenT) Gene-based association test integrating xQTLs
@@ -60,21 +52,13 @@ eqtl_z=data$eqtl_z # (matrix) Z-statistics for same 58 SNPs (allele-harmonized) 
 LD=data$LD # (matrix) LD matrix for 58 SNPs (allele-harmonized)
 results=gent(ad_z,LD,xqtl_Z=eqtl_z) # adding `xqtl_Z` weighting matrix makes it xGenT
 
-print(results)
-$pval
-[1] 5.126952e-05
-
-$shape
-[1] 1.906503
-
-$rate
-[1] 0.03287074
-
-$mu_h0
-[1] 58
-
-$sigma2_h0
-[1] 1764.487
+str(results)
+List of 5
+ $ pval     : num 0.0948
+ $ shape    : num 0.523
+ $ rate     : num 0.00388
+ $ mu_h0    : num 135
+ $ sigma2_h0: num 34818
 ```
 
 # (MuGenT) Multi-ancestry gene-based association test
@@ -90,21 +74,13 @@ t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, 
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs (allele-harmonized)
 results=mugent(t2d_z,LD_list)
 
-print(results)
-$pval
-[1] 4.606173e-47
-
-$shape
-[1] 8.437202
-
-$rate
-[1] 1.68744
-
-$mu_h0
-[1] 5
-
-$sigma2_h0
-[1] 2.963067
+str(results)
+List of 5
+ $ pval     : num 4.61e-47
+ $ shape    : num 8.44
+ $ rate     : num 1.69
+ $ mu_h0    : num 5
+ $ sigma2_h0: num 2.96
 ```
 
 # (MuGenT-PH) Multi-ancestry gene-based test of association heterogeneity
@@ -113,26 +89,18 @@ This tests the null hypothesis that the gene is not associated with the disease 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of association heterogeneity with type 2 diabetes (T2D) across multiple populations. T2D  Z-statistics are from the GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
 library(gent)
-data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
+data=readRDS('example_MuGenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
 t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized) for PPP3CA gene
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs (allele-harmonized)
 results=mugent_ph(t2d_z,LD_list)
 
-print(results)
-$pval
-[1] 0.007877747
-
-$shape
-[1] 20.19291
-
-$rate
-[1] 0.02692388
-
-$mu_h0
-[1] 750
-
-$sigma2_h0
-[1] 27856.31
+str(results)
+List of 5
+ $ pval     : num 0.00788
+ $ shape    : num 20.2
+ $ rate     : num 0.0269
+ $ mu_h0    : int 750
+ $ sigma2_h0: num 27856
 ```
 
 # (MuGenT-Pleio) Multi-ancestry gene-based test of pleiotropic association with all populations
@@ -141,17 +109,15 @@ This tests the null hypothesis that the gene is not associated with the disease 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of pleiotropy across multiple  populations for type 2 diabetes (T2D). T2D  Z-statistics are from the GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
 library(gent)
-data=readRDS('example_mugenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
+data=readRDS('example_MuGenT_data.Rds') # https://github.com/noahlorinczcomi/gent/tree/main/example_data 
 t2d_z=data$t2d_z # (matrix) Z-statistics for 150 SNPs (rows) from the EUR, AFA, SAS, EAS, and HIS (columns) GWAS (allele-harmonized) for PPP3CA gene
 LD_list=data$LD_list # list of population-specific LD matrices for 150 SNPs (allele-harmonized)
 results=mugent_pleio(t2d_z,LD_list)
 
-print(results)
-$result
-[1] "pleiotropy"
-
-$adjusted_significance_quantile
-[1] 1.478305
+str(results)
+List of 2
+ $ result                        : chr "pleiotropy"
+ $ adjusted_significance_quantile: num 1.48
 ```
 This test simply compares a test statistic to a critical value and so returns only whether the null hypothesis was rejected (i.e., `$result == 'pleiotropy'`) or not rejected (i.e., `$result == 'no pleiotropy'`).
 
