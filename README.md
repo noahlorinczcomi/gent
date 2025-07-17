@@ -19,7 +19,7 @@ All methods use only GWAS summary statistics and an LD reference panel. The dosa
 # (GenT) Gene-based association test
 This tests the null hypothesis that no SNPs in the the gene-specific set are associated with the disease trait. The image below shows an overview of the statistical and computational frameworks of the GenT method.
 
-![](https://github.com/noahlorinczcomi/gent/blob/main/gent_overview.png)
+![](https://github.com/noahlorinczcomi/gent/blob/main/overview_images/gent_overview.png)
 
 We now show how to load our example data for the *SYK* gene and perform a gene-based association test with GenT. Z-statistics are from the Alzheimer's disease (AD) GWAS by Bellenguez et al. (2022) and the LD matrix is estimated using 1000 Genomes Phase 3 European samples.
 ```
@@ -41,7 +41,7 @@ List of 5
 # (xGenT) Gene-based association test integrating xQTLs
 This tests the null hypothesis that no SNPs in the gene-specific set are associated with the disease trait using an xQTL-weighted statistic. The image below shows an overview of the statistical and computational frameworks of the xGenT method.
 
-![](https://github.com/noahlorinczcomi/gent/blob/main/xgent_overview.png)
+![](https://github.com/noahlorinczcomi/gent/blob/main/overview_images/xgent_overview.png)
 
 We now show how to load our example data for the *RIPK2* gene and perform a gene-based association test integrating brain eQTLs with xGenT. Disease Z-statistics are from the Alzheimer's disease GWAS by Bellenguez et al. (2022); eQTL Z-statistics are from GTEx v8 (https://gtexportal.org/home/) in cerebellum, spinal cord, frontal cortex, cortex, and hippocampal tissues; the LD matrix is estimated using 1000 Genomes Phase 3 European samples.
 ```
@@ -64,7 +64,7 @@ List of 5
 # (MuGenT) Multi-ancestry gene-based association test
 This tests the null hypothesis that no SNPs in the gene-specific set for any population are associated with the disease trait. The image below shows an overview of the statistical and computational frameworks of the MuGenT method and also shows how to perform the MuGenT-PH (MuGenT population heterogeneity) test (see the **MuGenT-PH** subsection below).
 
-![](https://github.com/noahlorinczcomi/gent/blob/main/mugent_overview.png)
+![](https://github.com/noahlorinczcomi/gent/blob/main/overview_images/mugent_overview.png)
 
 We show how to load our example data for the *PPP3CA* gene and perform a gene-based test of association with type 2 diabetes (T2D) integrating GWAS data from African American (AFA), East and South Asian (EAS, SAS), European (EUR), and Hispanic (HIS) populations. T2D Z-statistics are from GWAS by Suzuki et al. (2024) and the LD matrices are population-specific and estimated using 1000 Genomes Phase 3 samples.
 ```
