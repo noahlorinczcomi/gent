@@ -1,7 +1,5 @@
 # Installation
 ```
-devtools::install_github('noahlorinczcomi/gent')
-# or
 remotes::install_github('noahlorinczcomi/gent')
 ```
 
@@ -17,7 +15,7 @@ The methods contained in this R package perform joint tests of association on se
 All methods use only GWAS summary statistics and an LD reference panel. The dosage allele in GWAS must match the dosage allele in the LD reference panel.
 
 # (GenT) Gene-based association test
-This tests the null hypothesis that no SNPs in the the gene-specific set are associated with the disease trait. The image below shows an overview of the statistical and computational frameworks of the GenT method.
+This tests the null hypothesis that no SNPs in the gene-specific set are associated with the disease trait. The image below shows an overview of the statistical and computational frameworks of the GenT method.
 
 ![](https://github.com/noahlorinczcomi/gent/blob/main/overview_images/gent_overview.png)
 
