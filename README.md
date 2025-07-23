@@ -1,9 +1,24 @@
-# Installation
+# R installation
 ```
 remotes::install_github('noahlorinczcomi/gent')
 ```
 
-We also have a Shiny application for GenT applied to 50+ complex diseases here: [https://nlorinczcomi.shinyapps.io/gent/](https://nlorinczcomi.shinyapps.io/gent/).
+Jump to examples for a **single gene**:
+* [GenT](https://github.com/noahlorinczcomi/gent#gent-gene-based-association-test) `gent()`
+* [xGenT](https://github.com/noahlorinczcomi/gent#xgent-gene-based-association-test-integrating-xqtls) `gent()`
+* [MuGenT](https://github.com/noahlorinczcomi/gent#mugent-multi-ancestry-gene-based-association-test) `mugent()`
+* [MuGenT Population heterogeneity](https://github.com/noahlorinczcomi/gent#mugent-ph-multi-ancestry-gene-based-test-of-association-heterogeneity) `mugent_ph()`
+* [MuGenT Pleiotropy](https://github.com/noahlorinczcomi/gent?tab=readme-ov-file#mugent-pleio-multi-ancestry-gene-based-test-of-pleiotropic-association-with-all-populations) `mugent_pleio()`
+
+Jump to examples for **genome-wide analyses**:
+* [GenT](https://github.com/noahlorinczcomi/gent/wiki/Full-example-of-GenT) `gent_genomewide()`
+* [xGenT](https://github.com/noahlorinczcomi/gent/wiki/Full-example-of-xGenT) `xgent_genomewide()`
+* [MuGenT](https://github.com/noahlorinczcomi/gent/wiki/Full-example-of-MuGenT) `mugent_genomewide()`
+* [MuGenT Population heterogeneity](https://github.com/noahlorinczcomi/gent/wiki/Full-example-of-MuGenT%E2%80%90PH) `mugent_ph_genomewide()`
+* [MuGenT Pleiotropy](https://github.com/noahlorinczcomi/gent/wiki/Full-example-of-MuGenT%E2%80%90Pleiotropy) `mugent_pleio_genomewide()`
+* [Fine-mapping gene-based test statistics](https://github.com/noahlorinczcomi/gent/wiki/Fine%E2%80%90mapping-gene%E2%80%90based-associations) `gent_pips_genomewide()`
+
+Shiny application for 50+ diseases: [https://nlorinczcomi.shinyapps.io/gent/](https://nlorinczcomi.shinyapps.io/gent/).
 
 # Summary
 The methods contained in this R package perform joint tests of association on sets of SNPs which may be in linkage disequilibrium (LD) with each other. When SNP sets are gene-specific (e.g., containing SNPs near a gene), we refer to our set of methods as 'gene-based association' tests. When LD between SNPs in each set is known, these methods are exact. When LD is estimated without bias, these methods have controlled false positive and negative rates in simulations (see our [preprint](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5080346)) though no theoretical guarantee. The methods available in this R package are
