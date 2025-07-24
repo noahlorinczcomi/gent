@@ -4,16 +4,19 @@
 \alias{gent}
 \title{Gene-based association test (GenT)}
 \usage{
-gent(zs = NULL, LD, A = NULL, chisquares = NULL)
+gent(zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL)
 }
 \arguments{
 \item{zs}{vector of SNP-specific Z-statistics from GWAS whose indices correspond to those of \code{LD}}
 
 \item{LD}{LD matrix whose row/column indices correspond to the indices of \code{zs}}
 
+\item{mafs}{Minor allele frequencies of the SNPs whose Z-statistics are in \code{zs} (in corresponding order). If non-null, inverse 2MAF(1-MAF) weights will be aplied.}
+
 \item{chisquares}{if you instead give chi-square statistics (squared Z-statistics), supply them here and leave \code{zs} empty}
 }
 \value{
+A list with these components:
 \itemize{
 \item \code{pval}: P-value for testing H0: gene is not associated with trait.
 \item \code{shape}: shape parameter of null (Gamma) distribution.

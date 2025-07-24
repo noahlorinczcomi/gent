@@ -12,7 +12,7 @@ mugent_ph(Z, ldlist)
 \item{ldlist}{list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}}
 }
 \value{
-\itemize{
+\itemize {
 \item \code{pval}: P-value for testing H0: gene is not associated with trait.
 \item \code{shape}: shape parameter of null (Gamma) distribution.
 \item \code{rate}: rate parameter of null (Gamma) distribution.
