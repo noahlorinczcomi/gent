@@ -56,3 +56,15 @@
 #' data(AMRGenTStatLD)
 #' str(AMRGenTStatLD)
 "AMRGenTStatLD"
+
+
+#' Ensembl hg19 coordinates of gene start and end base pair positions
+#'
+#' Each row in this data set is a unique pair of HGNC gene symbols and Ensembl IDs. Their chromosomes, start, end, and base pair midpoint positions are provided.
+#'
+#' @format Each row in this data set is a unique pair of HGNC gene symbols and Ensembl IDs. Their chromosomes, start, end, and base pair midpoint positions are provided
+#' @source Ensembl hg19 coordinates downloaded from the Biomart web tool.
+#' @examples
+#' data(EnsemblHg19GenePos)
+#' str(EnsemblHg19GenePos)
+"EnsemblHg19GenePos"
