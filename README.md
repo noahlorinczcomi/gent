@@ -3,7 +3,7 @@ The methods contained in this R package test the association between a set of SN
 
 [Our preprint](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5080346)
 
-[Pre-computed results for 50+ phenotypes](https://nlorinczcomi.shinyapps.io/gent/)
+[Pre-computed results for 50+ phenotypes (Shiny app)](https://nlorinczcomi.shinyapps.io/gent/)
 
 ## R installation
 ```
