@@ -21,8 +21,6 @@ Jump to examples for testing a **single gene**:
 Jump to examples for testing **genome-wide**:
 * [GenT](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-GenT) `gent::gent_genomewide()`
 * [xGenT](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-xGenT) `gent::xgent_genomewide()`
-* [MuGenT](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-MuGenT) `gent::mugent_genomewide()`
-* [MuGenT Population heterogeneity](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-MuGenT%E2%80%90PH) `gent::mugent_ph_genomewide()`
-* [MuGenT Pleiotropy](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-MuGenT%E2%80%90Pleiotropy) `gent::mugent_pleio_genomewide()`
+* [MuGenT + Post-hoc Heterogeneity and Pleiotropy tests](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-MuGenT-&--post%E2%80%90hoc-tests) `gent::mugent_genomewide()`
 * [Fine-mapping gene-based test statistics](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-GenT%E2%80%90Finemap) `gent::gent_pips_genomewide()`
 
