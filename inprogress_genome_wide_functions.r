@@ -1,5 +1,5 @@
 # GenT
-gent_genomewide=function(gwas,KbWindow=50,ld_population='EUR',snp='rsid',chromosome='chr',position='position',effect_allele='effect_allele',z='z',beta=NULL,se=NULL,index=NULL,savefp=NULL,verbose=TRUE) {
+gent_genomewide=function(gwas,KbWindow=50,ld_population='EUR',ld_directory='ld_directory',snp='rsid',chromosome='chr',position='position',effect_allele='effect_allele',z='z',beta=NULL,se=NULL,index=NULL,savefp=NULL,verbose=TRUE) {
   # expects:
   ## 1) gwas: GWAS summary statistics with at least rsid, chr, position, effect_allele, z
   ## 2) ld_population: population of LD. data will be list of LD matrices. each entry corresponds to one chromosome and is a list. each entry of each list entry is a gene-specific LD matrix of +/-1Mb 1kg v3 SNPs
@@ -8,7 +8,7 @@ gent_genomewide=function(gwas,KbWindow=50,ld_population='EUR',snp='rsid',chromos
   ## 5) savefp: directory to save results in (will also return them)
   if(is.null(z) & !is.null(beta) & !is.null(se)) gwas=gwas %>% mutate(z=!!sym(beta)/!!sym(se))
   if(is.null(index)) index=data(hg19genepos)  else index=fread('~/isilon/Cheng-Noah/manuscripts/druggable_genes/data/genepositions_hg19.txt') # NEED TO ADD HERE
-  setwd('~/isilon/Cheng-Noah/reference_data/ld_matrices')
+  setwd(ld_directory)
   ld_population=tail(unlist(strsplit(ld_population,'/')),1)
   if(toupper(ld_population)=='HIS') ldpop='AMR' else ldpop=toupper(ld_population)
   gwas=gwas %>% na.omit()
@@ -59,6 +59,7 @@ gent_genomewide=function(gwas,KbWindow=50,ld_population='EUR',snp='rsid',chromos
 mugent_genomewide=function(
     gwas_list,
     ld_population_list,
+    ld_directory='ld_directory',
     KbWindow=50,
     snp_list=lapply(1:length(gwas_list),'rsid'),
     chromosome_list=lapply(1:length(gwas_list),'chr'),
@@ -105,7 +106,7 @@ mugent_genomewide=function(
             {
               # load gene-specific LD matrices (more memory efficient than loading all genes at once)
               ldi=lapply(names(ld_population_list),function(h) {
-                setwd('~/isilon/Cheng-Noah/reference_data/ld_matrices/')
+                setwd(ld_directory)
                 setwd(h)
                 setwd(paste0('chr',chrs[cc]))
                 fps=dir()
