@@ -108,7 +108,7 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
   # symbol: Gene symbol variable name in `genedf`
   # pval: Gene-based test statistic P-value variable name in `genedf`
   # clump_p: Only genes with a P-value less than this threshold may index a locus for clumping
-  # clump_kb: Kilobase size of the left and right windows which form the locus in which clumping is applied (total window size is 2 times clump_kb)
+  # clump_kb: Kilobase size of the entire clumping window. Left and right windows from the index gene will be half the size of `clump_kb`
   # clump_r2: Only genes correlated with lead genes beyond this threshold may be clumped to other genes
   # verbose: TRUE if progress should be printed to the console, FALSE otherwise
   
