@@ -124,6 +124,7 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
     filter(pval<clump_p) %>%
     arrange(pval)
   if(nrow(df)==0) {if(verbose) {cat('no significant clumps; returning NA\n')};return(NA)}
+  clump_kb=round(clump_kb/2)
   clumps=list()
   k=0
   # loop over each chromosome
