@@ -1,0 +1,59 @@
+#!/usr/bin/bash
+
+declare -A dataset_urls=(
+["EAS"]="https://zenodo.org/records/16782543/files/EAS.zip"
+["AMR"]="https://zenodo.org/records/16782541/files/AMR.zip"
+["AFR_chr1-10"]="https://zenodo.org/records/16780125/files/AFR_chr1-10.zip"
+["AFR_chr11-22"]="https://zenodo.org/records/16782180/files/AFR_chr11-22.zip"
+["EUR"]="https://zenodo.org/records/16762678/files/EUR.zip"
+["SAS"]="https://zenodo.org/records/16755767/files/SAS.zip"
+)
+
+download_file() {
+local url=$1
+wget -t0 -c "$url" -P "$DIR/" || echo "Failed to download $url"
+}
+
+# empty argument check
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 <EUR, EAS, SAS, AMR, AFR, ALL>"
+    echo "Examples: $0 all"
+    echo "         $0 afr"
+    exit 1
+fi
+
+# case insensitivity
+input=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+echo $input
+
+if [[ -z "$2" ]]; then
+    DIR="."
+else
+    DIR="$2"
+    mkdir -p "$DIR"
+fi
+
+# Handle the user's input
+case $input in
+"EAS"|"AMR"|"EUR"|"SAS")
+echo "Downloading $input"
+download_file "${dataset_urls[$input]}"
+;;
+"AFR")
+echo "Downloading $input"
+download_file "${dataset_urls["AFR_chr1-10"]}"
+download_file "${dataset_urls["AFR_chr11-22"]}"
+;;
+"ALL")
+echo "Downloading all datasets..."
+for key in "${!dataset_urls[@]}"; do
+download_file "${dataset_urls[$key]}"
+done
+;;
+*)
+echo "Invalid input. Please use one of the following: EAS, AMR, AFR, EUR, SAS, or all."
+exit 1
+;;
+esac
+
+echo "Download(s) complete!"
