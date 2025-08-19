@@ -288,42 +288,6 @@ gent_finemap=function(
   return(rdf)
 }
 
-ad_result=gent_genomewide(
-    gwas=ad_gwas %>% filter(Chromosome==1),                  # full GWAS summary statistics
-    ld_population='EUR',           # population of the LD reference to use. must match your GWAS population
-    ld_directory='~/isilon/Cheng-Noah/reference_data/ld_matrices',   # directory in which you executed LD.fetch
-    KbWindow=50,                   # Kb window size. SNPs which are within this window will be tested in gene-specific sets
-    snp='MarkerName',              # column name of unique SNP identifier in ad_gwas
-    chromosome='Chromosome',       # column name of chromosome in ad_gwas
-    position='Position',           # column name of SNP base pair position (hg19) in ad_gwas
-    effect_allele='Effect_allele', # column name of SNP effect allele in ad_gwas
-    z='z',                         # Z-statistic column is not present in ad_gwas so set NULL
-    verbose=TRUE)   
-
-
-testres=gent_finemap(
-    gent_results=ad_result,
-    ld_population='EUR',
-    gwas_n=480000,
-    # index_genes=NULL,
-    index_genes=sample(ad_result$gene,10,replace=F),
-    chromosome='chr',
-    gene_start='gene_start',
-    symbol='gene',
-    pval='pval',
-    null_mean='mu_h0',
-    null_variance='sigma2_h0',
-    pval_threshold=0.05/12727,
-    window_kb_width=2000,
-    R_ridge_penalty=0,
-    clump_p=0.05/12727,
-    clump_r2=0.01,
-    verbose=TRUE,
-    index=NULL)
-
-
-
-
 # function to perform PLINK-style clumping of gene-based test statistics
 gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start',symbol='symbol',pval='pval',
                     clump_p=0.05/12727,clump_kb=1000,clump_r2=0.01,verbose=TRUE) {
@@ -393,13 +357,3 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
 }
 
 
-
-
-
-gene_clump(genedf,'EUR',clump_p=0.5)
-
-finemapping_results=gent_finemap_genomewide(
-  gent_results,
-  ld_population='EUR',
-  pval_threshold=0.05/12727,
-  window_kb_width=2000)
