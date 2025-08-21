@@ -302,7 +302,429 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
   return(out)
 }
 
+#' Genome-wide gene-based association test (GenT)
+#'
+#' This function performs gene-based association testing genome-wide.
+#' @param gwas GWAS summary statistics
+#' @param KbWindow Kilobase window used to assign SNPs to genes
+#' @param ld_population LD population, one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR'
+#' @param ld_directory Relative or absolute filepath to LD directory (see Github Wiki)
+#' @param snp Column name of SNP rsID in GWAS data
+#' @param chromosome Column name of SNP chromosome in GWAS data
+#' @param position Column name of SNP hg19 base pair position in GWAS data
+#' @param effect_allele Column name of SNP effect allele in GWAS data
+#' @param z Column name of SNP Z-statistic in GWAS data
+#' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
+#' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @return A dataframe with these components:
+#' \itemize{
+#'  \item `pval`: P-value testing the gene-based null hypothesis
+#'  \item `shape`: Shape parameter of the Gamma null distribution
+#'  \item `rate`: Rate parameter of the Gamma null distribution
+#'  \item `mu_h0`: Expected value of the gene-based test statistic under the null hypothesis
+#'  \item `sigma2_h0`: Variance of the gene-based test statistic under the null hypothesis
+#'  \item `gene`: Gene symbol
+#'  \item `m`: Number of SNPs tested in gene-specific set
+#'  \item `chr`: Chromosome of gene
+#'  \item `gene_start`: Start position of gene (Ensembl hg19)
+#'  \item `window_start`: Start position of window in which SNPs were captured for this gene (hg19)
+#'  \item `gene_end`: End position of gene (Ensembl hg19)
+#'  \item `window_end`: End position of window in which SNPs were captured for this gene (hg19)
+#' }
+#'
+#' @export
+#' @examples
+#' # Example for Alzheimer's disease GWAS data
+#' gent_genomewide(
+#'   gwas=ad_gwas,
+#'   ld_population='EUR',
+#'   ld_directory='ld_matrices',
+#'   KbWindow=50,
+#'   snp='MarkerName',
+#'   chromosome='Chromosome',
+#'   position='Position',
+#'   effect_allele='Effect_allele',
+#'   z='z',
+#'   verbose=TRUE)
+gent_genomewide=function(gwas,
+                         KbWindow=50,
+                         ld_population='EUR',
+                         ld_directory='ld_directory',
+                         snp='rsid',
+                         chromosome='chr',
+                         position='position',
+                         effect_allele='effect_allele',
+                         z='z',
+                         index=NULL,
+                         verbose=TRUE) {
+  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  setwd(ld_directory)
+  gwas=gwas %>% na.omit()
+  gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z))
+  chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
+  rdf=data.frame()
+  for(cc in 1:length(chrs)) {
+    setwd(ld_directory)
+    setwd(ld_population)
+    setwd(paste0('chr',cc))
+    if(verbose) cat('Starting chromosome', chrs[cc], '\n')
+    gwas_chr=gwas %>% filter(chr==chrs[cc])
+    index_chr=index %>% filter(chr==cc)
+    genes=unique(index_chr$symbol)
+    #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    for(i in 1:length(genes)) {
+      #if(verbose) setTxtProgressBar(pb, i)
+      tryCatch(
+        {
+          # check up front that the data contains at least one SNP for this gene
+          starti=index_chr %>% filter(symbol==genes[i]) %>% select(start) %>% head(.,1) %>% pull()
+          endi=index_chr %>% filter(symbol==genes[i]) %>% select(end) %>% head(.,1) %>% pull()
+          starti=starti-KbWindow*1e3
+          endi=endi+KbWindow*1e3
+          gwas_chri=gwas_chr %>% filter(position>starti,position<endi)
+          if(nrow(gwas_chri)==0) stop()
+          # then proceed to load LD
+          genefp=paste0(genes[i],'.Rds')
+          if(!file.exists(genefp)) stop()
+          ld=readRDS(genefp)
+          ldrn=rownames(ld)
+          spp=sapply(ldrn,\(.) unlist(strsplit(.,'_')))
+          ld_df=t(spp) %>% as.data.frame() %>% rename(rsid=V1,a1=V2)
+          ldrn=ld_df$rsid
+          usesnps=intersect(ldrn,gwas_chri$rsid)
+          gwas_chri=gwas_chri %>% filter(rsid %in% usesnps) %>% distinct(rsid,.keep_all=TRUE) %>% arrange(position)
+          z=gwas_chri %>% left_join(ld_df,by='rsid') %>% mutate(z=ifelse(effect_allele==a1,z,-z)) %>% pull(z)
+          # make sure data contains SNPs for this gene
+          if(length(z)==0) stop()
+          rownames(ld)=colnames(ld)=ldrn
+          ld=ld[gwas_chri$rsid,gwas_chri$rsid]
+          result=gent(z,ld)
+          toadd=as.data.frame(result) %>% mutate(gene=genes[i],m=nrow(ld),chr=chrs[cc],gene_start=starti+KbWindow*1e3,window_start=starti,gene_end=endi-KbWindow*1e3,window_end=endi)
+          rdf=rbind(rdf,toadd)
+        },
+        error=function(x) NA
+      )
+    }
+    #close(pb)
+  }
+  rdf %>% as_tibble()
+}
 
+#' Genome-wide multi-trait/ancestry gene-based association test (MuGenT)
+#'
+#' This function performs multi-trait/ancestry gene-based association testing genome-wide.
+#' @param gwas List of population/trait-specific GWAS summary statistics
+#' @param KbWindow Kilobase window used to assign SNPs to genes
+#' @param ld_population_list List of LD populations (see Github Wiki)
+#' @param ld_directory Relative or absolute filepath to LD directory (see Github Wiki)
+#' @param snp_list List of column names of SNP rsIDs in GWAS datasets
+#' @param chromosome_list List of column name of SNP chromosomes in GWAS datasets
+#' @param position_list List of column name of SNP hg19 base pair positions in GWAS datasetes
+#' @param effect_allele_list List of column name of SNP effect alleles in GWAS datasets
+#' @param z_list List of column name of SNP Z-statistics in GWAS datasets
+#' @param mugentpleio_alpha MuGenT-Pleio nominal Type I error rate (uncorrected significance threshold)
+#' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
+#' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @return A list of dataframes with these components:
+#' \itemize{
+#' \itemize{
+#'  \code{$MuGenT}
+#'  \item `test`: Type of test (MuGenT)
+#'  \item `gene`: Gene symbol
+#'  \item `chr`: Chromosome of gene
+#'  \item `pval`: P-value testing the gene-based null hypothesis
+#'  \item `shape`: Shape parameter of the Gamma null distribution
+#'  \item `rate`: Rate parameter of the Gamma null distribution
+#'  \item `mu_h0`: Expected value of the gene-based test statistic under the null hypothesis
+#'  \item `sigma2_h0`: Variance of the gene-based test statistic under the null hypothesis
+#' }
+#' \itemize{
+#' \code{$MuGenT-PH}
+#'  \item `test`: Type of test (MuGenT-PH)
+#'  \item `gene`: Gene symbol
+#'  \item `chr`: Chromosome of gene
+#'  \item `pval`: P-value testing the gene-based null hypothesis
+#'  \item `shape`: Shape parameter of the Gamma null distribution
+#'  \item `rate`: Rate parameter of the Gamma null distribution
+#'  \item `mu_h0`: Expected value of the gene-based test statistic under the null hypothesis
+#'  \item `sigma2_h0`: Variance of the gene-based test statistic under the null hypothesis
+#' }
+#' \itemize{
+#' \code{$MuGenT-Pleiotropy}
+#'  \item `test`: Type of test (MuGenT-PH)
+#'  \item `gene`: Gene symbol
+#'  \item `chr`: Chromosome of gene
+#'  \item `result`: Test result: 'pleitoropy' for evidence of pleiotropy, 'no pleiotropy' otherwise
+#'  \item `adjusted_significance_quantile`: Quantile of the null Gamma distribution corrected for multiple testing
+#' }
+#' }
+#'
+#' @export
+#' @examples
+#' # Example for COVID-19 GWAS data in EUR and AFR populations
+#' mugent_genomewide(
+#'   gwas_list = list(EUR=eur_gwas, AFR=afr_gwas),
+#'   ld_population_list = list(EUR='EUR', AFR='AFR'),
+#'   ld_directory = 'ld_matrices',
+#'   KbWindow = 50,
+#'   snp_list = list(EUR='rsid', AFR='rsid'),
+#'   chromosome_list = list(EUR='#CHR', AFR='#CHR'),
+#'   position_list = list(EUR='POS', AFR='POS'),
+#'   effect_allele_list = list(EUR='ALT', AFR='ALT'),
+#'   z_list = list(EUR='z', AFR='z'),
+#'   verbose = TRUE)
+mugent_genomewide=function(
+    gwas_list,
+    ld_population_list,
+    ld_directory='ld_directory',
+    KbWindow=50,
+    snp_list=lapply(1:length(gwas_list),'rsid'),
+    chromosome_list=lapply(1:length(gwas_list),'chr'),
+    position_list=lapply(1:length(gwas_list),'position'),
+    effect_allele_list=lapply(1:length(gwas_list),'effect_allele'),
+    z_list=lapply(1:length(gwas_list),'z'),
+    mugentpleio_alpha=0.05/12727,
+    index=NULL,
+    verbose=TRUE) {
+  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  # clean each GWAS
+  k=length(gwas_list)
+  used_snps=c()
+  for(i in 1:k) {
+    gwas=gwas_list[[i]]
+    gwas=gwas %>% tidyr::drop_na()
+    gwas=gwas %>% select(
+      rsid=!!sym(snp_list[[i]]),
+      chr=!!sym(chromosome_list[[i]]),
+      position=!!sym(position_list[[i]]),
+      effect_allele=!!sym(effect_allele_list[[i]]),
+      z=!!sym(z_list[[i]]))
+    if(i==1) used_snps=gwas$rsid else used_snps=intersect(used_snps,gwas$rsid)
+    gwas_list[[i]]=gwas %>% filter(rsid %in% used_snps)
+  }
+  gwas_list=lapply(gwas_list, function(h) h %>% filter(rsid %in% used_snps))
+  chrs=lapply(gwas_list,function(h) h %>% pull(chr) %>% unique())
+  tt=table(unlist(chrs))
+  chrs=as.numeric(names(tt[tt==k]))
+  rdf1=rdf2=rdf3=data.frame()
+  for(cc in 1:length(chrs)) {
+    if(verbose) cat('Chromosome',chrs[cc],'\n')
+    # subset GWAS to this chromosome
+    gwas_chr=lapply(gwas_list,function(h) h %>% filter(chr==chrs[cc]))
+    ## load LD matrices (about 0.5 gb per chromsome per population)
+    # setwd('~/isilon/Cheng-Noah/reference_data/ld_matrices/chr_specific_files')
+    # ld_list=lapply(1:k,\(.) readRDS(paste0(ld_population_list[[.]],'/chr',cc,'.Rds')))
+    # ld_list is a length-k list. each entry is a list whose entries are gene-specific LD matrices
+    index_chr=index %>% filter(chr==chrs[cc])
+    genes=unique(index_chr$symbol)
+    #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    for(i in 1:length(genes)) {
+      #if(verbose) setTxtProgressBar(pb, i)
+      beep=tryCatch(
+        {
+          # load gene-specific LD matrices (more memory efficient than loading all genes at once)
+          ldi=lapply(names(ld_population_list),function(h) {
+            setwd(ld_directory)
+            setwd(h)
+            setwd(paste0('chr',chrs[cc]))
+            fps=dir()
+            fps=sapply(fps,function(o) unlist(strsplit(o,'[.]'))[1])
+            ix=which(fps==genes[i])
+            if(length(ix)==0) stop()
+            as.matrix(readRDS(paste0(fps[ix],'.Rds')))
+          })
+          # dataframes of SNP-effect allele pairs
+          ld_df=lapply(ldi,function(h) {
+            spp=sapply(rownames(h), function(.) strsplit(.,'_'))
+            do.call(rbind,spp) %>% as.data.frame() %>% rename(rsid=V1,a1=V2)
+          })
+          ## overlapping SNPs in LD matrices
+          #   ldi=lapply(ld_list,function(h) h[[which(names(h)==genes[i])]])
+          ldsnps=list(); for(o in 1:k) ldsnps[[o]]=unname(sapply(rownames(ldi[[o]]),function(h) unlist(strsplit(h,'_'))[1]))
+          tt=table(unlist(ldsnps))
+          ldsnps=names(tt[tt==k])
+          # use SNPs in both LD and GWAS (all GWAS already share the same SNPs because of code above)
+          usesnps=intersect(ldsnps,gwas_chr[[1]]$rsid)
+          ldi=lapply(ldi,function(h) {
+            h=as.matrix(h)
+            rownames(h)=colnames(h)=sapply(rownames(h),function(hh) unlist(strsplit(hh,'_'))[1])
+            h[usesnps,usesnps]
+          })
+          # match GWAS SNP to LD SNPs' order
+          gwas_chri=lapply(gwas_chr,function(h) {
+            x=h %>% filter(rsid %in% usesnps) %>% as.data.frame()
+            rownames(x)=x$rsid
+            x[rownames(ldi[[1]]),]
+          })
+          # harmonize SNPs to their respective effect alleles
+          for(o in 1:k) {
+            eao=ld_df[[o]]
+            gwas_chri[[o]]=gwas_chri[[o]] %>%
+              left_join(eao,by='rsid') %>%
+              mutate(z=ifelse(effect_allele==a1,z,-z)) %>%
+              select(-effect_allele) %>%
+              rename(effect_allele=a1)
+          }
+          # Z-matrix
+          Z=lapply(gwas_chri,function(h) h %>% pull(z)) %>% do.call(cbind,.)
+          mugent_result=mugent(Z,ldi)
+          mugentph_result=mugent_ph(Z,ldi)
+          mugentpleio_result=mugent_pleio(Z,ldi,alpha=mugentpleio_alpha)
+          # store results
+          l1=data.frame(test='MuGenT',gene=genes[i],chr=chrs[cc]) %>% bind_cols(as.data.frame(mugent_result))
+          l2=data.frame(test='MuGenT-PH',gene=genes[i],chr=chrs[cc]) %>% bind_cols(as.data.frame(mugentph_result))
+          l3=data.frame(test='MuGenT-Pleiotropy',gene=genes[i],chr=chrs[cc]) %>% bind_cols(as.data.frame(mugentpleio_result))
+          rdf1=rbind(rdf1,l1)
+          rdf2=rbind(rdf2,l2)
+          rdf3=rbind(rdf3,l3)
+        },
+        error=function(x) NA
+      )
+      # if(is.logical(beep)) cat(i,'\n')
+    }
+    #close(pb)
+  }
+  return(list('MuGenT'=rdf1, 'MuGenT-PH'=rdf2, 'MuGenT-Pleiotropy'=rdf3))
+}
 
-
+#' Fine-mapping gene-based association test statistics
+#'
+#' This function performs fine-mapping of gene-based association tests statistics.
+#' @param gent_results Direct output of \code{gent_genomwide()} or \code{mugent_genomewide()$MuGenT}
+#' @param ld_population LD population, one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR'
+#' @param gwas_n GWAS sample size
+#' @param index_genes Vector of index genes to perform fine-mapping around. Will be found automatically using clumping if NULL
+#' @param chromosome Column name of gene chromosome in \code{gent_results}
+#' @param gene_start Column name of gene start position (hg19) in \code{gent_results}
+#' @param symbol Column name of gene symbol in \code{gent_results}
+#' @param pval Column name of gene-based test P-value in \code{gent_results}
+#' @param null_mean Column name of gene-based test null mean (number of tested SNPs) in \code{gent_results}
+#' @param null_variance Column name of gene-based test null variance in \code{gent_results}
+#' @param window_kb_width Kb of window in which fine-mapping should be performed (total window will be this size)
+#' @param R_ridge_penalty Ridge penalty to add to gene-gene correlation matrix
+#' @param clump_p P-value threshold to use when finding loci in which to perform fine-mapping (only invoked if \code{index_genes} is NULL)
+#' @param clump_r2 Gene-gene squared correlation upper threshold to use when finding loci in which to perform fine-mapping (only envoked if \code{index_genes} is NULL). Genes correlated below the square root of this threshold will be considered as tagging separate loci.
+#' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
+#' @return A dataframe with these components:
+#' \itemize{
+#'  \item `gene`: Gene symbol
+#'  \item `locus_index_gene`: This gene is at the center of the fine-mapped locus and was either the most significant gene or was set by you
+#'  \item `chr`: Chromosome location
+#'  \item `gene_start`: Start position of gene using Ensembl hg19
+#'  \item `finemapping_pip`: SuSiE posterior inclusion probability (PIP)
+#'  \item `finemapping_CS`: SuSiE credible set (NA if not in any credible set; set numbering is arbitrary)
+#' }
+#'
+#' @export
+#' @examples
+#' # Example for Alzheimer's disease GWAS data
+#' gent_finemap(
+#'   gent_results=gent_results,
+#'   ld_population='EUR',
+#'   gwas_n=50000,
+#'   index_genes=c('CR1','MYCL'),
+#'   window_kb_width=2000,
+#'   verbose=TRUE)
+gent_finemap=function(
+    gent_results,
+    ld_population,
+    gwas_n,
+    index_genes=NULL,
+    chromosome='chr',
+    gene_start='gene_start',
+    symbol='gene',
+    pval='pval',
+    null_mean='mu_h0',
+    null_variance='sigma2_h0',
+    window_kb_width=2000,
+    R_ridge_penalty=0,
+    clump_p=0.05/12727,
+    clump_r2=0.01,
+    verbose=TRUE,
+    index=NULL, ...) { # ...'s are for susieR::susie_rss()
+  ## steps:
+  # 1) Find index genes
+  # 2) perform fine-mapping across index genes
+  # load gent statistic correlations for this population
+  if(toupper(ld_population)=='EUR') {data(EURGenTStatLD);gent_ld=EURGenTStatLD}
+  if(toupper(ld_population)=='AFR') {data(AFRGenTStatLD);gent_ld=AFRGenTStatLD}
+  if(toupper(ld_population)=='EAS') {data(EASGenTStatLD);gent_ld=EASGenTStatLD}
+  if(toupper(ld_population)=='SAS') {data(SASGenTStatLD);gent_ld=SASGenTStatLD}
+  if(toupper(ld_population)=='AMR') {data(AMRGenTStatLD);gent_ld=AMRGenTStatLD}
+  # halve the total window size because I will go left then right later
+  window_kb_width=round(window_kb_width/2)
+  # load gene positional index
+  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  # clean gent results and perform asymptotic transformation
+  gent_results=gent_results %>%
+    rename(gene=!!sym(symbol),
+           chr=!!sym(chromosome),
+           gene_start=!!sym(gene_start),
+           pval=!!sym(pval),
+           null_mean=!!sym(null_mean),
+           null_variance=!!sym(null_variance)) %>%
+    mutate(rate=null_mean/null_variance, shape=null_mean*rate) %>%
+    mutate(Q=qgamma(pval,shape=shape,rate=rate,,lower.tail=FALSE)) %>%
+    mutate(a=(Q/null_mean-1)*null_mean/sqrt(null_variance))
+  notused=c()
+  if(!is.null(index_genes)) {
+    ug=paste(index_genes[1:3],collapse=', ')
+    if(verbose) message(paste0('\nchoosing loci around ',ug,' ...'))
+    # use genes that the user gave
+    # subset gene positional index to just genes to be analyzed
+    index=index %>% filter(symbol %in% index_genes)
+    use_genes=index$symbol
+  } else {
+    # find index genes using clump procedure
+    if(verbose) message('\nclumping genes to identify loci')
+    clumps=gene_clump(
+      gent_results,
+      ld_population,
+      chromosome=chromosome,
+      gene_start=gene_start,
+      symbol=symbol,
+      pval=pval,
+      clump_p=clump_p,
+      clump_kb=window_kb_width,
+      clump_r2=clump_r2,
+      verbose=FALSE)
+    use_genes=names(clumps)
+  }
+  # 2) now perform fine-mapping using selected genes as input loci
+  rdf=data.frame()
+  for(i in 1:length(use_genes)) {
+    # subset everything to this gene's chromosome
+    chri=index %>% filter(symbol==use_genes[i]) %>% head(.,1) %>% pull(chr)
+    gent_resultsi=gent_results %>% filter(chr==chri)
+    gent_ld_chr=as.matrix(gent_ld[[paste0('chr',chri)]])
+    if(!(use_genes[i] %in% gent_resultsi$gene)) {notused=c(notused,use_genes[i]);next}
+    indexbp=gent_results %>% filter(gene==use_genes[i]) %>% head(.,1) %>% pull(gene_start)
+    indexbp=c(indexbp,indexbp)+c(-window_kb_width,window_kb_width)*1e3
+    gent_resultsi=gent_results %>% filter(data.table::between(gene_start,indexbp[1],indexbp[2]))
+    # correlation matrix for these genes
+    ldgenes=intersect(gent_resultsi$gene,rownames(gent_ld_chr))
+    gent_resultsi=gent_resultsi %>% filter(gene %in% ldgenes)
+    gent_ldi=gent_ld_chr[gent_resultsi$gene,gent_resultsi$gene]
+    m=nrow(gent_ldi)
+    gent_ldi=(1-R_ridge_penalty)*gent_ldi+R_ridge_penalty*diag(m)
+    # apply fine-mapping here
+    fit=suppressWarnings(susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,verbose=FALSE,...))
+    # fit=susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,verbose=FALSE,...)
+    # assign credible sets to each SNP
+    cs=rep(NA,m)
+    if(!is.null(fit$sets$cs)) for(o in 1:length(fit$sets$cs)) cs[fit$sets$cs[[o]]]=o
+    gent_resultsi=gent_resultsi %>%
+      mutate(finemapping_pip=unname(fit$pip), finemapping_CS=cs) %>%
+      mutate(locus_index_gene=use_genes[i]) %>%
+      select(gene,locus_index_gene,chr,gene_start,finemapping_pip,finemapping_CS)
+    rdf=rbind(rdf,gent_resultsi)
+  }
+  # print messages?
+  if(verbose & length(notused)>0) {
+    notused=paste(notused,collapse=', ')
+    message(paste0('(',notused,') had insufficient SNPs to estimate gene-level correlations'))
+  }
+  return(rdf)
+}
 

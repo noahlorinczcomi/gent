@@ -36,7 +36,7 @@ gampars=function(z,LD,null=TRUE) {
   }
   rate=mu/sigma
   shape=mu^2/sigma
-  list(shape=shape,rate=rate)  
+  list(shape=shape,rate=rate)
 }
 # penalty function for mugent sel
 sf=function(x) pos(2*(x-0.5))
@@ -84,14 +84,14 @@ varmat=function(p,ldlist) {
   ix1=c(row(H[1:p,1:p]))
   ix2=c(col(H[1:p,1:p]))
   C=cbind(ix1,ix2)
-  diags=seq(1,p^2,length.out=p) 
+  diags=seq(1,p^2,length.out=p)
   for(i in 1:p^2) {
     for(j in 1:p^2) {
       left=C[i,]
       right=C[j,]
       both=c(left,right)
       boo1=length(unique(both))==2
-      boo2=(length(unique(left))==2) & (length(unique(right))==2) 
+      boo2=(length(unique(left))==2) & (length(unique(right))==2)
       if(boo1 & boo2) H[i,j]=tr(ldlist[[left[1]]]%*%ldlist[[left[2]]])
       if(i==j & (i%in%diags)) H[i,j]=2*tr(ldlist[[left[1]]]%*%ldlist[[right[1]]])
     }
@@ -111,7 +111,7 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
   # clump_kb: Kilobase size of the entire clumping window. Left and right windows from the index gene will be half the size of `clump_kb`
   # clump_r2: Only genes correlated with lead genes beyond this threshold may be clumped to other genes
   # verbose: TRUE if progress should be printed to the console, FALSE otherwise
-  
+
   # load correlations
   if(toupper(ld_population)=='EUR') {data(EURGenTStatLD);gent_ld=EURGenTStatLD}
   if(toupper(ld_population)=='AFR') {data(AFRGenTStatLD);gent_ld=AFRGenTStatLD}
@@ -132,7 +132,7 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
   for(cc in 1:length(chrs)) {
     gent_ldchr=gent_ld[[paste0('chr',chrs[cc])]] %>% as.matrix()
     df_chr=df %>% filter(chr==chrs[cc])
-    for(i in 1:nrow(df)) {
+    for(i in 1:nrow(df_chr)) {
       allclumps=unlist(clumps);allclumps=c(names(clumps),allclumps)
       allclumps=unname(allclumps)
       if(df$symbol[i] %in% allclumps) next
@@ -165,3 +165,5 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
   clumps=lapply(clumps,function(h) if(length(h)==0) NA else h)
   clumps
 }
+
+
