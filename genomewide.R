@@ -30,9 +30,9 @@ gent_genomewide=function(gwas,
     gwas_chr=gwas %>% filter(chr==chrs[cc])
     index_chr=index %>% filter(chr==cc)
     genes=unique(index_chr$symbol)
-    pb=txtProgressBar(min=0,max=length(genes),style=3)
+    #pb=txtProgressBar(min=0,max=length(genes),style=3)
     for(i in 1:length(genes)) {
-      if(verbose) setTxtProgressBar(pb, i)
+      #if(verbose) setTxtProgressBar(pb, i)
       tryCatch(
         {
           # check up front that the data contains at least one SNP for this gene
@@ -64,7 +64,7 @@ gent_genomewide=function(gwas,
         error=function(x) NA
           )
     }
-    close(pb)
+    #close(pb)
   }
   rdf %>% as_tibble()
 }
@@ -113,9 +113,9 @@ mugent_genomewide=function(
     # ld_list is a length-k list. each entry is a list whose entries are gene-specific LD matrices
     index_chr=index %>% filter(chr==chrs[cc])
     genes=unique(index_chr$symbol)
-    pb=txtProgressBar(min=0,max=length(genes),style=3)
+    #pb=txtProgressBar(min=0,max=length(genes),style=3)
     for(i in 1:length(genes)) {
-        if(verbose) setTxtProgressBar(pb, i)
+        #if(verbose) setTxtProgressBar(pb, i)
         beep=tryCatch(
             {
               # load gene-specific LD matrices (more memory efficient than loading all genes at once)
@@ -178,7 +178,7 @@ mugent_genomewide=function(
         )
         # if(is.logical(beep)) cat(i,'\n')
     }
-    close(pb)
+    #close(pb)
   }
   return(list('MuGenT'=rdf1, 'MuGenT-PH'=rdf2, 'MuGenT-Pleiotropy'=rdf3))
 }
