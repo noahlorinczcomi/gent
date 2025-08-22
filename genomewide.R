@@ -21,6 +21,7 @@ gent_genomewide=function(gwas,
   gwas=gwas %>% na.omit()
   gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z))
   chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
+  chrs=intersect(chrs,1:22)
   rdf=data.frame()
   for(cc in 1:length(chrs)) {
     setwd(ld_directory)
@@ -99,9 +100,10 @@ mugent_genomewide=function(
     gwas_list[[i]]=gwas %>% filter(rsid %in% used_snps)
   }
   gwas_list=lapply(gwas_list, function(h) h %>% filter(rsid %in% used_snps))
-  chrs=lapply(gwas_list,function(h) h %>% pull(chr) %>% unique())
+  chrs=lapply(gwas_list,function(h) h %>% pull(chr) %>% unique() %>% na.omit())
   tt=table(unlist(chrs))
   chrs=as.numeric(names(tt[tt==k]))
+  chrs=intersect(chrs,1:22)
   rdf1=rdf2=rdf3=data.frame()
   for(cc in 1:length(chrs)) {
     if(verbose) cat('Chromosome',chrs[cc],'\n')
