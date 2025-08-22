@@ -21,7 +21,7 @@ gent_genomewide=function(gwas,
   gwas=gwas %>% na.omit()
   gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z))
   chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
-  chrs=intersect(chrs,1:22)
+  chrs=base::intersect(chrs,1:22)
   rdf=data.frame()
   for(cc in 1:length(chrs)) {
     setwd(ld_directory)
@@ -103,7 +103,7 @@ mugent_genomewide=function(
   chrs=lapply(gwas_list,function(h) h %>% pull(chr) %>% unique() %>% na.omit())
   tt=table(unlist(chrs))
   chrs=as.numeric(names(tt[tt==k]))
-  chrs=intersect(chrs,1:22)
+  chrs=base::intersect(chrs,1:22)
   rdf1=rdf2=rdf3=data.frame()
   for(cc in 1:length(chrs)) {
     if(verbose) cat('Chromosome',chrs[cc],'\n')
@@ -321,6 +321,7 @@ gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start
   k=0
   # loop over each chromosome
   chrs=unique(df$chr)
+  chrs=base::intersect(as.numeric(na.omit(chrs)),1:22)
   for(cc in 1:length(chrs)) {
     gent_ldchr=gent_ld[[paste0('chr',chrs[cc])]] %>% as.matrix()
     df_chr=df %>% filter(chr==chrs[cc])
