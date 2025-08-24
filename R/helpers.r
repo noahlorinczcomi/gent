@@ -99,8 +99,16 @@ varmat=function(p,ldlist) {
   H
 }
 # function to perform PLINK-style clumping of gene-based test statistics
-gene_clump=function(genedf,ld_population,chromosome='chr',gene_start='gene_start',symbol='symbol',pval='pval',
-                    clump_p=0.05/12727,clump_kb=1000,clump_r2=0.01,verbose=TRUE) {
+gene_clump=function(genedf,
+                    ld_population,
+                    chromosome='chr',
+                    gene_start='gene_start',
+                    gene_symbol='symbol',
+                    pval='pval',
+                    clump_p=0.05/12727,
+                    clump_kb=1000,
+                    clump_r2=0.01,
+                    verbose=TRUE) {
   # genedf: gene-based association test statistic results for multiple genes (e.g., output of <gent/mugent/xgent>_genomewide())
   # ld_population: one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR' from 1000 Genomes Phase 3. Used for internal loading of GenT correlation matrices.
   # chromosome: Chromosome variable name in `genedf`

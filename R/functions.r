@@ -596,7 +596,7 @@ mugent_genomewide=function(
 #' @param index_genes Vector of index genes to perform fine-mapping around. Will be found automatically using clumping if NULL
 #' @param chromosome Column name of gene chromosome in \code{gent_results}
 #' @param gene_start Column name of gene start position (hg19) in \code{gent_results}
-#' @param symbol Column name of gene symbol in \code{gent_results}
+#' @param gene_symbol Column name of gene symbol in \code{gent_results}
 #' @param pval Column name of gene-based test P-value in \code{gent_results}
 #' @param null_mean Column name of gene-based test null mean (number of tested SNPs) in \code{gent_results}
 #' @param null_variance Column name of gene-based test null variance in \code{gent_results}
@@ -633,7 +633,7 @@ gent_finemap=function(
     index_genes=NULL,
     chromosome='chr',
     gene_start='gene_start',
-    symbol='gene',
+    gene_symbol='gene',
     pval='pval',
     null_mean='mu_h0',
     null_variance='sigma2_h0',
@@ -658,7 +658,7 @@ gent_finemap=function(
   if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
   # clean gent results and perform asymptotic transformation
   gent_results=gent_results %>%
-    rename(gene=!!sym(symbol),
+    rename(gene=!!sym(gene_symbol),
            chr=!!sym(chromosome),
            gene_start=!!sym(gene_start),
            pval=!!sym(pval),
@@ -683,7 +683,7 @@ gent_finemap=function(
       ld_population,
       chromosome=chromosome,
       gene_start=gene_start,
-      symbol=symbol,
+      gene_symbol=gene_symbol,
       pval=pval,
       clump_p=clump_p,
       clump_kb=window_kb_width,
