@@ -13,7 +13,7 @@ gent_genomewide(
   chromosome = "chr",
   position = "position",
   effect_allele = "effect_allele",
-  z = "z",
+  z_statistic = "z",
   index = NULL,
   verbose = TRUE
 )
@@ -35,7 +35,7 @@ gent_genomewide(
 
 \item{effect_allele}{Column name of SNP effect allele in GWAS data}
 
-\item{z}{Column name of SNP Z-statistic in GWAS data}
+\item{z_statistic}{Column name of SNP Z-statistic in GWAS data}
 
 \item{index}{Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.}
 
@@ -72,6 +72,6 @@ gent_genomewide(
   chromosome='Chromosome',
   position='Position',
   effect_allele='Effect_allele',
-  z='z',
+  z_statistic='z',
   verbose=TRUE)
 }

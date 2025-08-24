@@ -21,54 +21,54 @@
 #' z=c(mvnfast::rmvn(1,rep(0,5),diag(5)))
 #' gent(z,LD)
 gent=function (zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL) {
-    if (is.null(mafs) & is.null(xqtl_Z)) {
-        mu = nrow(LD)
-        trASAS = tr(LD %*% LD)
-    }
-    else if (!is.null(mafs) & is.null(xqtl_Z)) {
-        mafs = c(mafs)
-        if (length(mafs) != length(zs))
-            stop("length of MAF vector not equal to length of Z-statistic vector")
-        mafs = 2 * mafs * (1 - mafs)
-        A = diag(1/mafs)
-        mu = sum(diag(A %*% LD))
-        trASAS = tr(A %*% LD %*% A %*% LD)
-        sigma2 = 2 * trASAS
-        mu_h1 = mu + t(zs) %*% A %*% zs
-        sigma2_h1 = sigma2 + 4 * t(zs) %*% A %*% LD %*% A %*% zs
-        beta = mu/sigma2
-        alpha = mu * beta
-        y = c(t(zs) %*% A %*% zs)
-        pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
-        out=list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
-            sigma2_h0 = sigma2)
-        out=lapply(out,c)
-        return(out)
-    }
-    else if (is.null(mafs) & !is.null(xqtl_Z)) {
-        xqtl_Z = as.matrix(xqtl_Z)
-        m = nrow(xqtl_Z)
-        p = ncol(xqtl_Z)
-        L = matrix(0, m, m)
-        for (o in 1:p) L = L + xqtl_Z[, o] %*% t(xqtl_Z[, o])
-        L = L/sqrt(m * p)
-        mu = sum(diag(L %*% LD))
-        trASAS = tr(L %*% LD %*% L %*% LD)
-    }
+  if (is.null(mafs) & is.null(xqtl_Z)) {
+    mu = nrow(LD)
+    trASAS = tr(LD %*% LD)
+  }
+  else if (!is.null(mafs) & is.null(xqtl_Z)) {
+    mafs = c(mafs)
+    if (length(mafs) != length(zs))
+      stop("length of MAF vector not equal to length of Z-statistic vector")
+    mafs = 2 * mafs * (1 - mafs)
+    A = diag(1/mafs)
+    mu = sum(diag(A %*% LD))
+    trASAS = tr(A %*% LD %*% A %*% LD)
     sigma2 = 2 * trASAS
-    beta = (mu/trASAS)/2
-    alpha = beta * mu
-    if (!is.null(chisquares))
-        y = sum(chisquares)
-    else y = sum(zs^2)
-    mu_h1 = mu + y
-    if (!is.null(zs))
-        sigma2_h1 = sigma2 + 4 * t(zs) %*% LD %*% zs
-    else sigma2_h1 = NULL
+    mu_h1 = mu + t(zs) %*% A %*% zs
+    sigma2_h1 = sigma2 + 4 * t(zs) %*% A %*% LD %*% A %*% zs
+    beta = mu/sigma2
+    alpha = mu * beta
+    y = c(t(zs) %*% A %*% zs)
     pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
-    out = list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
-        sigma2_h0 = sigma2)
-    lapply(out, c)
+    out=list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
+             sigma2_h0 = sigma2)
+    out=lapply(out,c)
+    return(out)
+  }
+  else if (is.null(mafs) & !is.null(xqtl_Z)) {
+    xqtl_Z = as.matrix(xqtl_Z)
+    m = nrow(xqtl_Z)
+    p = ncol(xqtl_Z)
+    L = matrix(0, m, m)
+    for (o in 1:p) L = L + xqtl_Z[, o] %*% t(xqtl_Z[, o])
+    L = L/sqrt(m * p)
+    mu = sum(diag(L %*% LD))
+    trASAS = tr(L %*% LD %*% L %*% LD)
+  }
+  sigma2 = 2 * trASAS
+  beta = (mu/trASAS)/2
+  alpha = beta * mu
+  if (!is.null(chisquares))
+    y = sum(chisquares)
+  else y = sum(zs^2)
+  mu_h1 = mu + y
+  if (!is.null(zs))
+    sigma2_h1 = sigma2 + 4 * t(zs) %*% LD %*% zs
+  else sigma2_h1 = NULL
+  pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
+  out = list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
+             sigma2_h0 = sigma2)
+  lapply(out, c)
 }
 
 #' Multi-ancestry gene-based association test (MuGenT)
@@ -259,8 +259,8 @@ mugent_sel=function(Z,ldlist,verbose=T) {
 #' wd=getwd()
 #' ld(rs,ea,ld_ref,wd,plink_exec='plink',verbose=TRUE)
 ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),plink_exec='plink',chromosome=NULL,need_bim=TRUE,verbose=T,temp_file_prefix='') {
-    library(data.table);library(dplyr)
-    if(is.null(ld_ref_file)) stop('you must specify an LD reference in PLINK format without file extension')
+  library(data.table);library(dplyr)
+  if(is.null(ld_ref_file)) stop('you must specify an LD reference in PLINK format without file extension')
   if(need_bim) {
     bf=paste0(ld_ref_file,'.bim')
     if(!file.exists(bf)) stop(paste0(bf,' does not exist but it must'))
@@ -313,7 +313,7 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
 #' @param chromosome Column name of SNP chromosome in GWAS data
 #' @param position Column name of SNP hg19 base pair position in GWAS data
 #' @param effect_allele Column name of SNP effect allele in GWAS data
-#' @param z Column name of SNP Z-statistic in GWAS data
+#' @param z_statistic Column name of SNP Z-statistic in GWAS data
 #' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
 #' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
 #' @return A dataframe with these components:
@@ -344,7 +344,7 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
 #'   chromosome='Chromosome',
 #'   position='Position',
 #'   effect_allele='Effect_allele',
-#'   z='z',
+#'   z_statistic='z',
 #'   verbose=TRUE)
 gent_genomewide=function(gwas,
                          KbWindow=50,
@@ -354,13 +354,13 @@ gent_genomewide=function(gwas,
                          chromosome='chr',
                          position='position',
                          effect_allele='effect_allele',
-                         z='z',
+                         z_statistic='z',
                          index=NULL,
                          verbose=TRUE) {
   if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
   setwd(ld_directory)
   gwas=gwas %>% na.omit()
-  gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z))
+  gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z_statistic))
   chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
   rdf=data.frame()
   for(cc in 1:length(chrs)) {
@@ -421,7 +421,7 @@ gent_genomewide=function(gwas,
 #' @param chromosome_list List of column name of SNP chromosomes in GWAS datasets
 #' @param position_list List of column name of SNP hg19 base pair positions in GWAS datasetes
 #' @param effect_allele_list List of column name of SNP effect alleles in GWAS datasets
-#' @param z_list List of column name of SNP Z-statistics in GWAS datasets
+#' @param z_statistic_list List of column name of SNP Z-statistics in GWAS datasets
 #' @param mugentpleio_alpha MuGenT-Pleio nominal Type I error rate (uncorrected significance threshold)
 #' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
 #' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
@@ -471,7 +471,7 @@ gent_genomewide=function(gwas,
 #'   chromosome_list = list(EUR='#CHR', AFR='#CHR'),
 #'   position_list = list(EUR='POS', AFR='POS'),
 #'   effect_allele_list = list(EUR='ALT', AFR='ALT'),
-#'   z_list = list(EUR='z', AFR='z'),
+#'   z_statistic_list = list(EUR='z', AFR='z'),
 #'   verbose = TRUE)
 mugent_genomewide=function(
     gwas_list,
@@ -482,7 +482,7 @@ mugent_genomewide=function(
     chromosome_list=lapply(1:length(gwas_list),'chr'),
     position_list=lapply(1:length(gwas_list),'position'),
     effect_allele_list=lapply(1:length(gwas_list),'effect_allele'),
-    z_list=lapply(1:length(gwas_list),'z'),
+    z_statistic_list=lapply(1:length(gwas_list),'z'),
     mugentpleio_alpha=0.05/12727,
     index=NULL,
     verbose=TRUE) {
@@ -498,7 +498,7 @@ mugent_genomewide=function(
       chr=!!sym(chromosome_list[[i]]),
       position=!!sym(position_list[[i]]),
       effect_allele=!!sym(effect_allele_list[[i]]),
-      z=!!sym(z_list[[i]]))
+      z=!!sym(z_statistic_list[[i]]))
     if(i==1) used_snps=gwas$rsid else used_snps=intersect(used_snps,gwas$rsid)
     gwas_list[[i]]=gwas %>% filter(rsid %in% used_snps)
   }

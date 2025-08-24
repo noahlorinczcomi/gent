@@ -13,7 +13,7 @@ mugent_genomewide(
   chromosome_list = lapply(1:length(gwas_list), "chr"),
   position_list = lapply(1:length(gwas_list), "position"),
   effect_allele_list = lapply(1:length(gwas_list), "effect_allele"),
-  z_list = lapply(1:length(gwas_list), "z"),
+  z_statistic_list = lapply(1:length(gwas_list), "z"),
   mugentpleio_alpha = 0.05/12727,
   index = NULL,
   verbose = TRUE
@@ -34,7 +34,7 @@ mugent_genomewide(
 
 \item{effect_allele_list}{List of column name of SNP effect alleles in GWAS datasets}
 
-\item{z_list}{List of column name of SNP Z-statistics in GWAS datasets}
+\item{z_statistic_list}{List of column name of SNP Z-statistics in GWAS datasets}
 
 \item{mugentpleio_alpha}{MuGenT-Pleio nominal Type I error rate (uncorrected significance threshold)}
 
@@ -93,6 +93,6 @@ mugent_genomewide(
   chromosome_list = list(EUR='#CHR', AFR='#CHR'),
   position_list = list(EUR='POS', AFR='POS'),
   effect_allele_list = list(EUR='ALT', AFR='ALT'),
-  z_list = list(EUR='z', AFR='z'),
+  z_statistic_list = list(EUR='z', AFR='z'),
   verbose = TRUE)
 }
