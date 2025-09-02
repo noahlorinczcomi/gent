@@ -12,6 +12,7 @@ declare -A dataset_urls=(
 download_file() {
 local url=$1
 wget -t0 -c "$url" -P "$DIR/" || echo "Failed to download $url"
+unzip "$DIR/$(basename "$url")"
 }
 
 # empty argument check
