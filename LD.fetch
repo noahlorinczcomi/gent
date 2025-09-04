@@ -39,16 +39,25 @@ case $input in
 "EAS"|"AMR"|"EUR"|"SAS")
 echo "Downloading $input"
 download_file "${dataset_urls[$input]}"
+unzip "$DIR/$(basename "$url")"
 ;;
 "AFR")
 echo "Downloading $input"
 download_file "${dataset_urls["AFR_chr1-10"]}"
+tar -xvzf AFR_chr1-10.zip
 download_file "${dataset_urls["AFR_chr11-22"]}"
+tar -xvzf AFR_chr11-22.zip
 ;;
 "ALL")
 echo "Downloading all datasets..."
 for key in "${!dataset_urls[@]}"; do
 download_file "${dataset_urls[$key]}"
+unzip EUR.zip
+unzip EAS.zip
+unzip SAS.zip
+unzip AMR.zip
+tar -xvzf AFR_chr1-10.zip
+tar -xvzf AFR_chr11-22.zip
 done
 ;;
 *)
