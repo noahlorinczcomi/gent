@@ -100,15 +100,15 @@ varmat=function(p,ldlist) {
 }
 # function to perform PLINK-style clumping of gene-based test statistics
 gene_clump=function(genedf,
-                    ld_population,
-                    chromosome='chr',
-                    gene_start='gene_start',
-                    gene_symbol='symbol',
-                    pval='pval',
-                    clump_p=0.05/12727,
-                    clump_kb=1000,
-                    clump_r2=0.01,
-                    verbose=TRUE) {
+         ld_population,
+         chromosome='chr',
+         gene_start='gene_start',
+         gene_symbol='symbol',
+         pval='pval',
+         clump_p=0.05/12727,
+         clump_kb=1000,
+         clump_r2=0.01,
+         verbose=TRUE) {
   # genedf: gene-based association test statistic results for multiple genes (e.g., output of <gent/mugent/xgent>_genomewide())
   # ld_population: one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR' from 1000 Genomes Phase 3. Used for internal loading of GenT correlation matrices.
   # chromosome: Chromosome variable name in `genedf`
@@ -119,7 +119,6 @@ gene_clump=function(genedf,
   # clump_kb: Kilobase size of the entire clumping window. Left and right windows from the index gene will be half the size of `clump_kb`
   # clump_r2: Only genes correlated with lead genes beyond this threshold may be clumped to other genes
   # verbose: TRUE if progress should be printed to the console, FALSE otherwise
-
   # load correlations
   if(toupper(ld_population)=='EUR') {data(EURGenTStatLD);gent_ld=EURGenTStatLD}
   if(toupper(ld_population)=='AFR') {data(AFRGenTStatLD);gent_ld=AFRGenTStatLD}
@@ -134,6 +133,7 @@ gene_clump=function(genedf,
   if(nrow(df)==0) {if(verbose) {cat('no significant clumps; returning NA\n')};return(NA)}
   clump_kb=round(clump_kb/2)
   clumps=list()
+  skipped_genes=c()
   k=0
   # loop over each chromosome
   chrs=unique(df$chr)
@@ -143,34 +143,48 @@ gene_clump=function(genedf,
     for(i in 1:nrow(df_chr)) {
       allclumps=unlist(clumps);allclumps=c(names(clumps),allclumps)
       allclumps=unname(allclumps)
-      if(df$symbol[i] %in% allclumps) next
+      if(df_chr$symbol[i] %in% allclumps) next
       k=k+1
-      genesaround=df %>%
-        dplyr::filter(abs(gene_start-df$gene_start[i])<(clump_kb*1e3)) %>%
-        dplyr::filter(symbol!=df$symbol[i])
+      genesaround=df_chr %>%
+        dplyr::filter(abs(gene_start-df_chr$gene_start[i])<(clump_kb*1e3)) %>%
+        dplyr::filter(symbol!=df_chr$symbol[i])
       if(nrow(genesaround)==0) {
         clumps[[k]]=NA
-        names(clumps)[k]=df$symbol[i]
+        names(clumps)[k]=df_chr$symbol[i]
         next
       }
       # attach LD with this SNP
-      ix=which(rownames(gent_ldchr)==df$symbol[i])
+      # if gene not in LD reference, use closest gene as proxy
+      if(!(df_chr$symbol[i] %in% rownames(gent_ldchr))) {
+        posi=df_chr$gene_start[i]
+        closest_gene=df_chr %>% 
+          dplyr::filter(symbol!=df_chr$symbol[i]) %>% 
+          dplyr::mutate(d=abs(gene_start-posi)) %>%
+          dplyr::arrange(d) %>%
+          head(.,1) %>%
+          dplyr::pull(symbol)
+        if(closest_gene %in% names(clumps) || closest_gene %in% unlist(clumps)) next
+        df_chr$symbol[i]=closest_gene
+        df_chr=df_chr %>% dplyr::distinct()
+      }
+      ix=which(rownames(gent_ldchr)==df_chr$symbol[i])
       lddf=data.frame(symbol=rownames(gent_ldchr),r2=gent_ldchr[ix,]^2) %>%
         filter(symbol %in% genesaround$symbol) %>%
         filter(r2>clump_r2)
       if(nrow(lddf)==0) {
         # need to have nearby SNPs in LD to be clumps
         clumps[[k]]=NA
-        names(clumps)[k]=df$symbol[i]
+        names(clumps)[k]=df_chr$symbol[i]
         next
       }
       # toadd=lddf %>% filter(!(symbol %in% allclumps)) %>% pull(symbol)
       # clumps[[k]]=ifelse(length(toadd)==0,NA,toadd)
       clumps[[k]]=lddf %>% dplyr::filter(!(symbol %in% allclumps)) %>% pull(symbol)
-      names(clumps)[k]=df$symbol[i]
+      names(clumps)[k]=df_chr$symbol[i]
     }
   }
   clumps=lapply(clumps,function(h) if(length(h)==0) NA else h)
+  if(length(skipped_genes)>0) cat(skipped_genes,'not in LD reference\n')
   clumps
 }
 # Manhattan plot
