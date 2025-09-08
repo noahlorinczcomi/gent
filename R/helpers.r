@@ -210,6 +210,8 @@ gent_manhattan=function(gentres,
          y=expression('-log'[10]*'(gene-based P-value)'))
   if(label_genes) {
     if(!('gene_clump' %in% ls())) source('https://raw.githubusercontent.com/noahlorinczcomi/gent/refs/heads/main/R/helpers.r')
+    if(!require(ggrepel)) install.packages('ggrepel',repos = "https://cloud.r-project.org")
+    library(ggrepel)
     clumps=gene_clump(chrdf,
                       ld_population=ld_population,
                       chromosome=chromosome,
