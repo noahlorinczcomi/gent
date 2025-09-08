@@ -193,6 +193,7 @@ gent_manhattan=function(gentres,
                         gene_position='gene_start',
                         gene_pvalue='pval',
                         significance_threshold=0.05/12727,
+                        plot_threshold=1e-100,
                         label_genes=FALSE,
                         gene_label='gene',
                         ld_population='EUR') {
@@ -201,11 +202,12 @@ gent_manhattan=function(gentres,
     dplyr::mutate(!!sym(chromosome):=as.numeric(!!sym(chromosome)),
            !!sym(gene_position):=as.numeric(!!sym(gene_position)),
            !!sym(gene_pvalue):=as.numeric(!!sym(gene_pvalue))) %>%
-    # dplyr::select(!!sym(chromosome),!!sym(gene_position),!!sym(gene_pvalue)) %>%
+    dplyr::mutate(!!sym(gene_pvalue):=ifelse(!!sym(gene_pvalue)<1e-300,1e-300,!!sym(gene_pvalue))) %>%
     dplyr::group_by(!!sym(chromosome)) %>%
     dplyr::mutate(newbp=!!sym(chromosome)+!!sym(gene_position)/max(!!sym(gene_position),na.rm=TRUE)) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(chrcol=!!sym(chromosome) %in% seq(1,22,2))
+    dplyr::mutate(chrcol=!!sym(chromosome) %in% seq(1,22,2)) %>%
+    dplyr::mutate(!!sym(gene_pvalue):=ifelse(!!sym(gene_pvalue)<plot_threshold,plot_threshold,!!sym(gene_pvalue)))
   axisdf=chrdf %>% 
     dplyr::group_by(!!sym(chromosome)) %>%
     dplyr::summarise(newbp=median(newbp,na.rm=TRUE)) %>%
@@ -222,10 +224,10 @@ gent_manhattan=function(gentres,
           panel.grid.major=element_blank()) +
     labs(x='chromosome',
          y=expression('-log'[10]*'(gene-based P-value)'))
+  manplot
+  if(plot_threshold>0) manplot=manplot + labs(subtitle=paste('P-values truncated to',as.character(plot_threshold)))
   if(label_genes) {
-    if(!('gene_clump' %in% ls())) source('https://raw.githubusercontent.com/noahlorinczcomi/gent/refs/heads/main/R/helpers.r')
-    if(!require(ggrepel)) install.packages('ggrepel',repos = "https://cloud.r-project.org")
-    library(ggrepel)
+    # if(!('gene_clump' %in% ls())) source('https://raw.githubusercontent.com/noahlorinczcomi/gent/refs/heads/main/R/helpers.r')
     clumps=gene_clump(chrdf,
                       ld_population=ld_population,
                       chromosome=chromosome,
