@@ -126,11 +126,11 @@ gene_clump=function(genedf,
   if(toupper(ld_population)=='EAS') {data(EASGenTStatLD);gent_ld=EASGenTStatLD}
   if(toupper(ld_population)=='SAS') {data(SASGenTStatLD);gent_ld=SASGenTStatLD}
   if(toupper(ld_population)=='AMR') {data(AMRGenTStatLD);gent_ld=AMRGenTStatLD}
-  genedf=genedf %>% rename(symbol=!!sym(gene_symbol),gene_start=!!sym(gene_start),pval=!!sym(pval),chr=!!sym(chromosome))
+  genedf=genedf %>% dplyr::rename(symbol=!!sym(gene_symbol),gene_start=!!sym(gene_start),pval=!!sym(pval),chr=!!sym(chromosome))
   df=genedf %>%
-    select(symbol,gene_start,pval,chr) %>%
-    filter(pval<clump_p) %>%
-    arrange(pval)
+    dplyr::select(symbol,gene_start,pval,chr) %>%
+    dplyr::filter(pval<clump_p) %>%
+    dplyr::arrange(pval)
   if(nrow(df)==0) {if(verbose) {cat('no significant clumps; returning NA\n')};return(NA)}
   clump_kb=round(clump_kb/2)
   clumps=list()
@@ -139,15 +139,15 @@ gene_clump=function(genedf,
   chrs=unique(df$chr)
   for(cc in 1:length(chrs)) {
     gent_ldchr=gent_ld[[paste0('chr',chrs[cc])]] %>% as.matrix()
-    df_chr=df %>% filter(chr==chrs[cc])
+    df_chr=df %>% dplyr::filter(chr==chrs[cc])
     for(i in 1:nrow(df_chr)) {
       allclumps=unlist(clumps);allclumps=c(names(clumps),allclumps)
       allclumps=unname(allclumps)
       if(df$symbol[i] %in% allclumps) next
       k=k+1
       genesaround=df %>%
-        filter(abs(gene_start-df$gene_start[i])<(clump_kb*1e3)) %>%
-        filter(symbol!=df$symbol[i])
+        dplyr::filter(abs(gene_start-df$gene_start[i])<(clump_kb*1e3)) %>%
+        dplyr::filter(symbol!=df$symbol[i])
       if(nrow(genesaround)==0) {
         clumps[[k]]=NA
         names(clumps)[k]=df$symbol[i]
@@ -166,12 +166,86 @@ gene_clump=function(genedf,
       }
       # toadd=lddf %>% filter(!(symbol %in% allclumps)) %>% pull(symbol)
       # clumps[[k]]=ifelse(length(toadd)==0,NA,toadd)
-      clumps[[k]]=lddf %>% filter(!(symbol %in% allclumps)) %>% pull(symbol)
+      clumps[[k]]=lddf %>% dplyr::filter(!(symbol %in% allclumps)) %>% pull(symbol)
       names(clumps)[k]=df$symbol[i]
     }
   }
   clumps=lapply(clumps,function(h) if(length(h)==0) NA else h)
   clumps
 }
+# Manhattan plot
+gent_manhattan=function(gentres,
+                        chromosome='chr',
+                        gene_position='gene_start',
+                        gene_pvalue='pval',
+                        significance_threshold=0.05/12727,
+                        label_genes=FALSE,
+                        gene_label='gene',
+                        ld_population='EUR') {
+  if(label_genes) require(ggrepel)
+  chrdf=gentres %>%
+    dplyr::mutate(!!sym(chromosome):=as.numeric(!!sym(chromosome)),
+           !!sym(gene_position):=as.numeric(!!sym(gene_position)),
+           !!sym(gene_pvalue):=as.numeric(!!sym(gene_pvalue))) %>%
+    # dplyr::select(!!sym(chromosome),!!sym(gene_position),!!sym(gene_pvalue)) %>%
+    dplyr::group_by(!!sym(chromosome)) %>%
+    dplyr::mutate(newbp=!!sym(chromosome)+!!sym(gene_position)/max(!!sym(gene_position),na.rm=TRUE)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(chrcol=!!sym(chromosome) %in% seq(1,22,2))
+  axisdf=chrdf %>% 
+    dplyr::group_by(!!sym(chromosome)) %>%
+    dplyr::summarise(newbp=median(newbp,na.rm=TRUE)) %>%
+    dplyr::ungroup()
+  manplot=chrdf %>%
+    ggplot(aes(newbp,-log10(!!sym(gene_pvalue)),color=chrcol)) +
+    geom_point(pch=19) +
+    scale_color_manual(values=c('skyblue','royalblue')) +
+    geom_hline(yintercept=-log10(significance_threshold)) +
+    scale_x_continuous(breaks=axisdf$newbp,labels=axisdf$chr) +
+    theme_bw() +
+    theme(legend.position='none',
+          panel.grid.minor=element_blank(),
+          panel.grid.major=element_blank()) +
+    labs(x='chromosome',
+         y=expression('-log'[10]*'(gene-based P-value)'))
+  if(label_genes) {
+    if(!('gene_clump' %in% ls())) source('https://raw.githubusercontent.com/noahlorinczcomi/gent/refs/heads/main/R/helpers.r')
+    clumps=gene_clump(chrdf,
+                      ld_population=ld_population,
+                      chromosome=chromosome,
+                      gene_start=gene_position,
+                      gene_symbol=gene_label,
+                      pval=gene_pvalue,
+                      clump_p=significance_threshold,
+                      clump_kb=1000,
+                      clump_r2=0.01,
+                      verbose=TRUE)
+    if(length(clumps)==0) break
+    labdf=chrdf %>% dplyr::filter(!!sym(gene_label) %in% names(clumps))
+    manplot=manplot +
+      geom_text_repel(aes(newbp,-log10(!!sym(gene_pvalue)),label=!!sym(gene_label)),
+                      data=labdf,
+                      color='black',
+                      min.segment.length=0)
+  }
+  return(manplot)
+}
+# QQ plot
+gent_qq=function(gentres,gene_pvalue='pval') {
+  pv=as.data.frame(gentres)[,gene_pvalue]
+  pv=sort(na.omit(pv))
+  pp=ppoints(length(pv))
+  ppdf=data.frame(e=pp,o=pv)
+  qqplot=ppdf %>%
+    ggplot(aes(-log10(e),-log10(o))) +
+    geom_point(pch=19,color='royalblue') +
+    geom_abline(intercept=0,slope=1,lwd=2/3) +
+    theme_bw() +
+    theme(panel.grid.minor=element_blank(),
+          panel.grid.major=element_blank()) +
+    labs(x=expression('expected -log'[10]*'(gene-based P-value)'),
+         y=expression('observed -log'[10]*'(gene-based P-value)'))
+  return(qqplot)
+}
 
-
+                
