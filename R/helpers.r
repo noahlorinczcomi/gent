@@ -126,7 +126,7 @@ gene_clump=function(genedf,
   if(toupper(ld_population)=='EAS') {data(EASGenTStatLD);gent_ld=EASGenTStatLD}
   if(toupper(ld_population)=='SAS') {data(SASGenTStatLD);gent_ld=SASGenTStatLD}
   if(toupper(ld_population)=='AMR') {data(AMRGenTStatLD);gent_ld=AMRGenTStatLD}
-  genedf=genedf %>% rename(symbol=!!sym(symbol),gene_start=!!sym(gene_start),pval=!!sym(pval),chr=!!sym(chromosome))
+  genedf=genedf %>% rename(symbol=!!sym(gene_symbol),gene_start=!!sym(gene_start),pval=!!sym(pval),chr=!!sym(chromosome))
   df=genedf %>%
     select(symbol,gene_start,pval,chr) %>%
     filter(pval<clump_p) %>%
