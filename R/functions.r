@@ -358,7 +358,8 @@ gent_genomewide=function(gwas,
                          effect_allele='effect_allele',
                          z_statistic='z',
                          index=NULL,
-                         verbose=TRUE) {
+                         verbose=TRUE,
+                         return_snp_gene_pairs=FALSE) {
   if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
   setwd(ld_directory)
   gwas=gwas %>% na.omit()
