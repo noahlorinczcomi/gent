@@ -15,7 +15,8 @@ gent_genomewide(
   effect_allele = "effect_allele",
   z_statistic = "z",
   index = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  return_snp_gene_pairs = FALSE
 )
 }
 \arguments{
