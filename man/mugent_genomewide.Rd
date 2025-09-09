@@ -16,7 +16,8 @@ mugent_genomewide(
   z_statistic_list = lapply(1:length(gwas_list), "z"),
   mugentpleio_alpha = 0.05/12727,
   index = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  return_snp_gene_pairs = FALSE
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ mugent_genomewide(
 \item{index}{Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.}
 
 \item{verbose}{TRUE if progress should be printed to the console, FALSE otherwise}
+
+\item{return_snp_gene_pairs}{If TRUE, will return a chromosome-specific list of tested gene-specific SNP sets annotated by gene}
 
 \item{gwas}{List of population/trait-specific GWAS summary statistics}
 }
@@ -94,5 +97,6 @@ mugent_genomewide(
   position_list = list(EUR='POS', AFR='POS'),
   effect_allele_list = list(EUR='ALT', AFR='ALT'),
   z_statistic_list = list(EUR='z', AFR='z'),
-  verbose = TRUE)
+  verbose = TRUE.
+  return_snp_gene_pairs = FALSE)
 }

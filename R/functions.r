@@ -316,6 +316,7 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
 #' @param z_statistic Column name of SNP Z-statistic in GWAS data
 #' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
 #' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @param return_snp_gene_pairs If TRUE, will return a chromosome-specific list of tested gene-specific SNP sets annotated by gene
 #' @return A dataframe with these components:
 #' \itemize{
 #'  \item `pval`: P-value testing the gene-based null hypothesis
@@ -345,7 +346,8 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
 #'   position='Position',
 #'   effect_allele='Effect_allele',
 #'   z_statistic='z',
-#'   verbose=TRUE)
+#'   verbose=TRUE,
+#'   return_snp_gene_pairs=FALSE)
 gent_genomewide=function(gwas,
                          KbWindow=50,
                          ld_population='EUR',
@@ -363,6 +365,7 @@ gent_genomewide=function(gwas,
   gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z_statistic))
   chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
   chrs=intersect(1:22,chrs)
+  sgp=list()
   rdf=data.frame()
   for(cc in 1:length(chrs)) {
     setwd(ld_directory)
@@ -373,6 +376,8 @@ gent_genomewide=function(gwas,
     index_chr=index %>% filter(chr==cc)
     genes=unique(index_chr$symbol)
     #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    k=0
+    chrlist=list()
     for(i in 1:length(genes)) {
       #if(verbose) setTxtProgressBar(pb, i)
       tryCatch(
@@ -402,13 +407,27 @@ gent_genomewide=function(gwas,
           result=gent(z,ld)
           toadd=as.data.frame(result) %>% mutate(gene=genes[i],m=nrow(ld),chr=chrs[cc],gene_start=starti+KbWindow*1e3,window_start=starti,gene_end=endi-KbWindow*1e3,window_end=endi)
           rdf=rbind(rdf,toadd)
+          # record SNP-gene pairs
+          k=k+1
+          if(return_snp_gene_pairs) {
+            chrlist[[k]]=paste(gwas_chri$rsid,collapse=',')
+            names(chrlist)[k]=genes[i]
+          }
         },
         error=function(x) NA
       )
     }
     #close(pb)
+    if(return_snp_gene_pairs) {
+      sgp[[cc]]=chrlist
+      names(sgp)[[cc]]=paste0('chr',chrs[cc])
+    }
   }
-  rdf %>% as_tibble()
+  if(return_snp_gene_pairs) {
+    return(list(result=as_tibble(rdf),snp_sets=sgp))
+  } else {
+    return(as_tibble(rdf))
+  }
 }
 
 #' Genome-wide multi-trait/ancestry gene-based association test (MuGenT)
@@ -426,6 +445,7 @@ gent_genomewide=function(gwas,
 #' @param mugentpleio_alpha MuGenT-Pleio nominal Type I error rate (uncorrected significance threshold)
 #' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
 #' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @param return_snp_gene_pairs If TRUE, will return a chromosome-specific list of tested gene-specific SNP sets annotated by gene
 #' @return A list of dataframes with these components:
 #' \itemize{
 #' \itemize{
@@ -473,7 +493,8 @@ gent_genomewide=function(gwas,
 #'   position_list = list(EUR='POS', AFR='POS'),
 #'   effect_allele_list = list(EUR='ALT', AFR='ALT'),
 #'   z_statistic_list = list(EUR='z', AFR='z'),
-#'   verbose = TRUE)
+#'   verbose = TRUE.
+#'   return_snp_gene_pairs = FALSE)
 mugent_genomewide=function(
     gwas_list,
     ld_population_list,
@@ -486,7 +507,8 @@ mugent_genomewide=function(
     z_statistic_list=lapply(1:length(gwas_list),'z'),
     mugentpleio_alpha=0.05/12727,
     index=NULL,
-    verbose=TRUE) {
+    verbose=TRUE,
+    return_snp_gene_pairs=FALSE) {
   if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
   # clean each GWAS
   k=length(gwas_list)
@@ -508,8 +530,11 @@ mugent_genomewide=function(
   tt=table(unlist(chrs))
   chrs=as.numeric(names(tt[tt==k]))
   chrs=intersect(1:22,chrs)
+  sgp=list()
   rdf1=rdf2=rdf3=data.frame()
   for(cc in 1:length(chrs)) {
+    k=0
+    chrlist=list()
     if(verbose) cat('Chromosome',chrs[cc],'\n')
     # subset GWAS to this chromosome
     gwas_chr=lapply(gwas_list,function(h) h %>% filter(chr==chrs[cc]))
@@ -579,14 +604,26 @@ mugent_genomewide=function(
           rdf1=rbind(rdf1,l1)
           rdf2=rbind(rdf2,l2)
           rdf3=rbind(rdf3,l3)
+          # record SNP-gene pairs
+          k=k+1
+          if(return_snp_gene_pairs) {
+            chrlist[[k]]=paste(gwas_chri$rsid,collapse=',')
+            names(chrlist)[k]=genes[i]
+          }
         },
         error=function(x) NA
       )
       # if(is.logical(beep)) cat(i,'\n')
     }
     #close(pb)
+    if(return_snp_gene_pairs) {
+      sgp[[cc]]=chrlist
+      names(sgp)[[cc]]=paste0('chr',chrs[cc])
+    }
   }
-  return(list('MuGenT'=rdf1, 'MuGenT-PH'=rdf2, 'MuGenT-Pleiotropy'=rdf3))
+  outlist=list('MuGenT'=rdf1, 'MuGenT-PH'=rdf2, 'MuGenT-Pleiotropy'=rdf3)
+  if(return_snp_gene_pairs) outlist$snp_sets=sgp
+  
 }
 
 #' Fine-mapping gene-based association test statistics
