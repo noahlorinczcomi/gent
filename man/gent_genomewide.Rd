@@ -40,6 +40,8 @@ gent_genomewide(
 \item{index}{Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.}
 
 \item{verbose}{TRUE if progress should be printed to the console, FALSE otherwise}
+
+\item{return_snp_gene_pairs}{If TRUE, will return a chromosome-specific list of tested gene-specific SNP sets annotated by gene}
 }
 \value{
 A dataframe with these components:
@@ -73,5 +75,6 @@ gent_genomewide(
   position='Position',
   effect_allele='Effect_allele',
   z_statistic='z',
-  verbose=TRUE)
+  verbose=TRUE,
+  return_snp_gene_pairs=FALSE)
 }

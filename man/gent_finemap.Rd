@@ -11,7 +11,7 @@ gent_finemap(
   index_genes = NULL,
   chromosome = "chr",
   gene_start = "gene_start",
-  symbol = "gene",
+  gene_symbol = "gene",
   pval = "pval",
   null_mean = "mu_h0",
   null_variance = "sigma2_h0",
@@ -37,7 +37,7 @@ gent_finemap(
 
 \item{gene_start}{Column name of gene start position (hg19) in \code{gent_results}}
 
-\item{symbol}{Column name of gene symbol in \code{gent_results}}
+\item{gene_symbol}{Column name of gene symbol in \code{gent_results}}
 
 \item{pval}{Column name of gene-based test P-value in \code{gent_results}}
 
