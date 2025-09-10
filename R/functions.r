@@ -367,7 +367,6 @@ gent_genomewide=function(gwas,
     index_chr=index %>% filter(chr==cc)
     genes=unique(index_chr$symbol)
     #pb=txtProgressBar(min=0,max=length(genes),style=3)
-    k=0
     chrlist=list()
     for(i in 1:length(genes)) {
       #if(verbose) setTxtProgressBar(pb, i)
@@ -399,10 +398,9 @@ gent_genomewide=function(gwas,
           toadd=as.data.frame(result) %>% mutate(gene=genes[i],m=nrow(ld),chr=chrs[cc],gene_start=starti+KbWindow*1e3,window_start=starti,gene_end=endi-KbWindow*1e3,window_end=endi)
           rdf=rbind(rdf,toadd)
           # record SNP-gene pairs
-          k=k+1
           if(return_snp_gene_pairs) {
-            chrlist[[k]]=paste(gwas_chri$rsid,collapse=',')
-            names(chrlist)[k]=genes[i]
+            chrlist[[i]]=paste(gwas_chri$rsid,collapse=',')
+            names(chrlist)[i]=genes[i]
           }
         },
         error=function(x) NA
@@ -528,7 +526,6 @@ mugent_genomewide=function(
   sgp=list()
   rdf1=rdf2=rdf3=data.frame()
   for(cc in 1:length(chrs)) {
-    k=0
     chrlist=list()
     if(verbose) cat('Chromosome',chrs[cc],'\n')
     # subset GWAS to this chromosome
@@ -600,10 +597,9 @@ mugent_genomewide=function(
           rdf2=rbind(rdf2,l2)
           rdf3=rbind(rdf3,l3)
           # record SNP-gene pairs
-          k=k+1
           if(return_snp_gene_pairs) {
-            chrlist[[k]]=paste(gwas_chri$rsid,collapse=',')
-            names(chrlist)[k]=genes[i]
+            chrlist[[i]]=paste(gwas_chri$rsid,collapse=',')
+            names(chrlist)[i]=genes[i]
           }
         },
         error=function(x) NA
@@ -857,7 +853,6 @@ wgent_genomewide=function(gwas,
     index_chr=index %>% filter(chr==cc)
     genes=unique(index_chr$symbol)
     #pb=txtProgressBar(min=0,max=length(genes),style=3)
-    k=0
     chrlist=list()
     for(i in 1:length(genes)) {
       #if(verbose) setTxtProgressBar(pb, i)
@@ -908,10 +903,9 @@ wgent_genomewide=function(gwas,
             mutate(pval_unweighted=result_unweighted$pval)
           rdf=rbind(rdf,toadd)
           # record SNP-gene pairs
-          k=k+1
           if(return_snp_gene_pairs) {
-            chrlist[[k]]=paste(gwas_chri$rsid,collapse=',')
-            names(chrlist)[k]=genes[i]
+            chrlist[[i]]=paste(gwas_chri$rsid,collapse=',')
+            names(chrlist)[i]=genes[i]
           }
         },
         error=function(x) NA
