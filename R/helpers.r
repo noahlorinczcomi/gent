@@ -157,8 +157,8 @@ gene_clump=function(genedf,
       # if gene not in LD reference, use closest gene as proxy
       if(!(df_chr$symbol[i] %in% rownames(gent_ldchr))) {
         posi=df_chr$gene_start[i]
-        closest_gene=df_chr %>% 
-          dplyr::filter(symbol!=df_chr$symbol[i]) %>% 
+        closest_gene=df_chr %>%
+          dplyr::filter(symbol!=df_chr$symbol[i]) %>%
           dplyr::mutate(d=abs(gene_start-posi)) %>%
           dplyr::arrange(d) %>%
           head(.,1) %>%
@@ -208,7 +208,7 @@ gent_manhattan=function(gentres,
     dplyr::ungroup() %>%
     dplyr::mutate(chrcol=!!sym(chromosome) %in% seq(1,22,2)) %>%
     dplyr::mutate(!!sym(gene_pvalue):=ifelse(!!sym(gene_pvalue)<plot_threshold,plot_threshold,!!sym(gene_pvalue)))
-  axisdf=chrdf %>% 
+  axisdf=chrdf %>%
     dplyr::group_by(!!sym(chromosome)) %>%
     dplyr::summarise(newbp=median(newbp,na.rm=TRUE)) %>%
     dplyr::ungroup()
@@ -238,16 +238,17 @@ gent_manhattan=function(gentres,
                       clump_kb=1000,
                       clump_r2=0.01,
                       verbose=TRUE)
-    if(length(clumps)==0) break
-    labdf=chrdf %>% dplyr::filter(!!sym(gene_label) %in% names(clumps))
-    manplot=manplot +
-      geom_text_repel(aes(newbp,-log10(!!sym(gene_pvalue)),label=!!sym(gene_label)),
-                      max.overlaps=Inf,
-                      ylim=c(-log10(significance_threshold),-log10(plot_threshold)),
-                      force=10,
-                      data=labdf,
-                      color='black',
-                      min.segment.length=0)
+    if(length(clumps)>0) {
+      labdf=chrdf %>% dplyr::filter(!!sym(gene_label) %in% names(clumps))
+      manplot=manplot +
+        geom_text_repel(aes(newbp,-log10(!!sym(gene_pvalue)),label=!!sym(gene_label)),
+                        max.overlaps=Inf,
+                        ylim=c(-log10(significance_threshold),-log10(plot_threshold)),
+                        force=10,
+                        data=labdf,
+                        color='black',
+                        min.segment.length=0)
+    }
   }
   return(manplot)
 }
@@ -269,4 +270,4 @@ gent_qq=function(gentres,gene_pvalue='pval') {
   return(qqplot)
 }
 
-                
+
