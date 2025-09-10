@@ -14,7 +14,7 @@ mugent_pleio(Z, ldlist, alpha = 0.05)
 \item{alpha}{the nominal (uncorrected) significance threshold for testing a single gene. If testing all genes genome-wide, this should be less than the threshold for testing a single gene.}
 }
 \value{
-\itemize {
+\itemize{
 \item \code{result}: An indication if H0 (the gene is not association in all populations/with all traits) can be rejected. 'Pleiotropy' if it is rejected and 'no pleiotropy' otherwise.
 \item \code{adjusted_significance_quantile}: The chi-square quantile of the adjusted nominal significance threshold for inferring H1 given the number of SNPs used and populations/traits tested.
 }
