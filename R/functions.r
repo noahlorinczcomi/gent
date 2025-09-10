@@ -412,7 +412,7 @@ gent_genomewide=function(gwas,
       names(sgp)[[cc]]=paste0('chr',chrs[cc])
     }
   }
-  outlist=result=as_tibble(rdf)
+  outlist=list(result=as_tibble(rdf))
   if(return_snp_gene_pairs) outlist$snp_sets=sgp
   return(outlist)
 }
@@ -917,7 +917,7 @@ wgent_genomewide=function(gwas,
       names(sgp)[[cc]]=paste0('chr',chrs[cc])
     }
   }
-  outlist=result=as_tibble(rdf)
+  outlist=list(result=as_tibble(rdf))
   if(return_snp_gene_pairs) outlist$snp_sets=sgp
   return(outlist)
 }
