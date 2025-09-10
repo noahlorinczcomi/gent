@@ -4,16 +4,18 @@
 \alias{gent}
 \title{Gene-based association test (GenT)}
 \usage{
-gent(zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL)
+gent(zs = NULL, LD, A = NULL, xqtl_Z = NULL, chisquares = NULL)
 }
 \arguments{
 \item{zs}{vector of SNP-specific Z-statistics from GWAS whose indices correspond to those of \code{LD}}
 
 \item{LD}{LD matrix whose row/column indices correspond to the indices of \code{zs}}
 
-\item{mafs}{Minor allele frequencies of the SNPs whose Z-statistics are in \code{zs} (in corresponding order). If non-null, inverse 2MAF(1-MAF) weights will be aplied.}
+\item{A}{A weight matrix which forms the quadratic form \code{zs}'(A^2)\code{zs}. Equivalent to setting zs<-A\%*\%zs. Weights SNPs in gene-based testing.}
 
-\item{chisquares}{if you instead give chi-square statistics (squared Z-statistics), supply them here and leave \code{zs} empty}
+\item{xqtl_Z}{An m x p matrix of xQTL effect sizes (e.g., Z-statistics). Rows correspond to SNPs; columns correspond to tissues or xQTL types.}
+
+\item{chisquares}{SNP chi-square statistics. If you supply a value for this and leave \code{A} and \code{xqtl_Z} empty, it is equivalent to supplying \code{zs} and \code{LD}.}
 }
 \value{
 A list with these components:
