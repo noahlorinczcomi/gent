@@ -748,10 +748,6 @@ gent_finemap=function(
   return(rdf)
 }
 
-
-
-
-
 #' Genome-wide inverse MAF-weighted gene-based association test
 #'
 #' This function performs gene-based association testing genome-wide using weights.
@@ -911,4 +907,211 @@ wgent_genomewide=function(gwas,
   } else {
     return(as_tibble(rdf))
   }
+}
+
+#' Clumping of gene-based test statistics
+#'
+#' This function performs PLINK-style clumping of gene-based test statistics
+#' @param gentres Gene-based association test statistic results for multiple genes (e.g., output of <gent/mugent/xgent>_genomewide())
+#' @param ld_population one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR' from 1000 Genomes Phase 3. Used for internal loading of GenT correlation matrices.
+#' @param chromosome Chromosome variable name in \code{genedf}
+#' @param gene_start Gene start position variable name in \code{genedf}
+#' @param symbol Gene symbol variable name in \code{genedf}
+#' @param pval Gene-based test statistic P-value variable name in \code{genedf}
+#' @param clump_p Only genes with a P-value less than this threshold may index a locus for clumping
+#' @param clump_kb Kilobase size of the entire clumping window. Left and right windows from the index gene will be half the size of \code{clump_kb}
+#' @param clump_r2 Only genes correlated with lead genes beyond this threshold may be clumped to other genes
+#' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @return A vector of clumped genes
+#' @export
+#' @examples
+#' gent_results=gent_genomewide(gwas_data,50,'EUR','ld_directory')
+#' gene_clump(gent_results,'EUR')
+gene_clump=function(gentres,
+                    ld_population,
+                    chromosome='chr',
+                    gene_start='gene_start',
+                    gene_symbol='symbol',
+                    pval='pval',
+                    clump_p=0.05/12727,
+                    clump_kb=1000,
+                    clump_r2=0.01,
+                    verbose=TRUE) {
+  # load correlations
+  if(toupper(ld_population)=='EUR') {data(EURGenTStatLD);gent_ld=EURGenTStatLD}
+  if(toupper(ld_population)=='AFR') {data(AFRGenTStatLD);gent_ld=AFRGenTStatLD}
+  if(toupper(ld_population)=='EAS') {data(EASGenTStatLD);gent_ld=EASGenTStatLD}
+  if(toupper(ld_population)=='SAS') {data(SASGenTStatLD);gent_ld=SASGenTStatLD}
+  if(toupper(ld_population)=='AMR') {data(AMRGenTStatLD);gent_ld=AMRGenTStatLD}
+  gentres=gentres %>%
+    dplyr::rename(symbol=!!sym(gene_symbol),
+                  gene_start=!!sym(gene_start),
+                  pval=!!sym(pval),
+                  chr=!!sym(chromosome))
+  df=gentres %>%
+    dplyr::select(symbol,gene_start,pval,chr) %>%
+    dplyr::filter(pval<clump_p) %>%
+    dplyr::arrange(pval)
+  if(nrow(df)==0) {if(verbose) {cat('no significant clumps; returning NA\n')};return(NA)}
+  clump_kb=round(clump_kb/2)
+  clumps=list()
+  skipped_genes=c()
+  k=0
+  # loop over each chromosome
+  chrs=unique(df$chr)
+  for(cc in 1:length(chrs)) {
+    gent_ldchr=gent_ld[[paste0('chr',chrs[cc])]] %>% as.matrix()
+    df_chr=df %>% dplyr::filter(chr==chrs[cc])
+    for(i in 1:nrow(df_chr)) {
+      allclumps=unlist(clumps);allclumps=c(names(clumps),allclumps)
+      allclumps=unname(allclumps)
+      if(df_chr$symbol[i] %in% allclumps) next
+      k=k+1
+      genesaround=df_chr %>%
+        dplyr::filter(abs(gene_start-df_chr$gene_start[i])<(clump_kb*1e3)) %>%
+        dplyr::filter(symbol!=df_chr$symbol[i])
+      if(nrow(genesaround)==0) {
+        clumps[[k]]=NA
+        names(clumps)[k]=df_chr$symbol[i]
+        next
+      }
+      # attach LD with this SNP
+      # if gene not in LD reference, use closest gene as proxy
+      if(!(df_chr$symbol[i] %in% rownames(gent_ldchr))) {
+        posi=df_chr$gene_start[i]
+        closest_gene=df_chr %>%
+          dplyr::filter(symbol!=df_chr$symbol[i]) %>%
+          dplyr::mutate(d=abs(gene_start-posi)) %>%
+          dplyr::arrange(d) %>%
+          head(.,1) %>%
+          dplyr::pull(symbol)
+        if(closest_gene %in% names(clumps) || closest_gene %in% unlist(clumps)) next
+        df_chr$symbol[i]=closest_gene
+        df_chr=df_chr %>% dplyr::distinct()
+      }
+      ix=which(rownames(gent_ldchr)==df_chr$symbol[i])
+      lddf=data.frame(symbol=rownames(gent_ldchr),r2=gent_ldchr[ix,]^2) %>%
+        filter(symbol %in% genesaround$symbol) %>%
+        filter(r2>clump_r2)
+      if(nrow(lddf)==0) {
+        # need to have nearby SNPs in LD to be clumps
+        clumps[[k]]=NA
+        names(clumps)[k]=df_chr$symbol[i]
+        next
+      }
+      clumps[[k]]=lddf %>% dplyr::filter(!(symbol %in% allclumps)) %>% pull(symbol)
+      names(clumps)[k]=df_chr$symbol[i]
+    }
+  }
+  clumps=lapply(clumps,function(h) if(length(h)==0) NA else h)
+  if(length(skipped_genes)>0) cat(skipped_genes,'not in LD reference\n')
+  clumps
+}
+
+#' Gene-based test Manhattan plot
+#'
+#' This function generates a Manhattan plot of gene-based test statistics
+#' @param gentres Gene-based association test statistic results for multiple genes (e.g., output of <gent/mugent/xgent>_genomewide())
+#' @param chromosome Column name of gene chromosome in \code{gentres} data
+#' @param gene_position Column name of gene base pair position (e.g., TSS, start position) in \code{gentres} data
+#' @param gene_pvalue Column name of gene-based test P-values in  \code{gentres} data
+#' @param significance_threshold Genome-wide significance threshold. Used to draw a reference line and for annotating genes if you set \code{label_genes=TRUE}
+#' @param plot_threshold Lower P-value threshold at which to truncate gene-based test P-values.
+#' @param label_genes If TRUE, clumped genes (see \code{gene_clump()}) will be annotated at their position
+#' @param gene_label Column name of gene identifier (e.g., gene symbol) in \code{gentres} data
+#' @param ld_population LD population, one of 'EUR','AFR','EAS','SAS', or 'AMR'
+#' @return A \code{ggplot2} object which is a Manhattan plot of gene-based association test P-values
+#' @export
+#' @examples
+#' gent_results=gent_genomewide(gwas_data,50,'EUR','ld_directory')
+#' gent_manhattan(gent_results)
+gent_manhattan=function(gentres,
+                        chromosome='chr',
+                        gene_position='gene_start',
+                        gene_pvalue='pval',
+                        significance_threshold=0.05/12727,
+                        plot_threshold=1e-100,
+                        label_genes=FALSE,
+                        gene_label='gene',
+                        ld_population='EUR') {
+  if(label_genes) require(ggrepel)
+  chrdf=gentres %>%
+    dplyr::mutate(!!sym(chromosome):=as.numeric(!!sym(chromosome)),
+                  !!sym(gene_position):=as.numeric(!!sym(gene_position)),
+                  !!sym(gene_pvalue):=as.numeric(!!sym(gene_pvalue))) %>%
+    dplyr::mutate(!!sym(gene_pvalue):=ifelse(!!sym(gene_pvalue)<1e-300,1e-300,!!sym(gene_pvalue))) %>%
+    dplyr::group_by(!!sym(chromosome)) %>%
+    dplyr::mutate(newbp=!!sym(chromosome)+!!sym(gene_position)/max(!!sym(gene_position),na.rm=TRUE)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(chrcol=!!sym(chromosome) %in% seq(1,22,2)) %>%
+    dplyr::mutate(!!sym(gene_pvalue):=ifelse(!!sym(gene_pvalue)<plot_threshold,plot_threshold,!!sym(gene_pvalue)))
+  axisdf=chrdf %>%
+    dplyr::group_by(!!sym(chromosome)) %>%
+    dplyr::summarise(newbp=median(newbp,na.rm=TRUE)) %>%
+    dplyr::ungroup()
+  manplot=chrdf %>%
+    ggplot(aes(newbp,-log10(!!sym(gene_pvalue)),color=chrcol)) +
+    geom_point(pch=19) +
+    scale_color_manual(values=c('skyblue','royalblue')) +
+    geom_hline(yintercept=-log10(significance_threshold)) +
+    scale_x_continuous(breaks=axisdf$newbp,labels=axisdf$chr) +
+    theme_bw() +
+    theme(legend.position='none',
+          panel.grid.minor=element_blank(),
+          panel.grid.major=element_blank()) +
+    labs(x='chromosome',
+         y=expression('-log'[10]*'(gene-based P-value)'))
+  manplot
+  if(plot_threshold>0) manplot=manplot + labs(subtitle=paste('P-values truncated to',as.character(plot_threshold)))
+  if(label_genes) {
+    clumps=gene_clump(chrdf,
+                      ld_population=ld_population,
+                      chromosome=chromosome,
+                      gene_start=gene_position,
+                      gene_symbol=gene_label,
+                      pval=gene_pvalue,
+                      clump_p=significance_threshold,
+                      clump_kb=1000,
+                      clump_r2=0.01,
+                      verbose=TRUE)
+    if(length(clumps)>0) {
+      labdf=chrdf %>% dplyr::filter(!!sym(gene_label) %in% names(clumps))
+      manplot=manplot +
+        geom_text_repel(aes(newbp,-log10(!!sym(gene_pvalue)),label=!!sym(gene_label)),
+                        max.overlaps=Inf,
+                        ylim=c(-log10(significance_threshold),-log10(plot_threshold)),
+                        force=10,
+                        data=labdf,
+                        color='black',
+                        min.segment.length=0)
+    }
+  }
+  return(manplot)
+}
+
+#' Gene-based test QQ plot
+#'
+#' This function generates a quantile-quantile plot of gene-based test statistics
+#' @param gentres Gene-based association test statistic results for multiple genes (e.g., output of <gent/mugent/xgent>_genomewide())
+#' @param gene_pvalue Column name of gene-based test P-values in  \code{gentres} data
+#' @return A \code{ggplot2} object which is a QQ plot of gene-based association test P-values
+#' @export
+#' @examples
+#' gent_results=gent_genomewide(gwas_data,50,'EUR','ld_directory')
+#' gent_qq(gent_results)
+gent_qq=function(gentres,gene_pvalue='pval') {
+  pv=as.data.frame(gentres)[,gene_pvalue]
+  pv=sort(na.omit(pv))
+  pp=ppoints(length(pv))
+  ppdf=data.frame(e=pp,o=pv)
+  qqplot=ppdf %>%
+    ggplot(aes(-log10(e),-log10(o))) +
+    geom_point(pch=19,color='royalblue') +
+    geom_abline(intercept=0,slope=1,lwd=2/3) +
+    theme_bw() +
+    theme(panel.grid.minor=element_blank(),
+          panel.grid.major=element_blank()) +
+    labs(x=expression('expected -log'[10]*'(gene-based P-value)'),
+         y=expression('observed -log'[10]*'(gene-based P-value)'))
+  return(qqplot)
 }

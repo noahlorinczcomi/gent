@@ -30,7 +30,7 @@ ld(
 \item{verbose}{should a statement about your effect alleles and those in the LD reference be printed to the console?}
 }
 \value{
-\itemize{
+\itemize {
 \item \code{ld}: LD matrix. Rows and columns are in the original order provided to this function, filtered to only those present in the LD reference.
 \item \code{signmat}: This is a vector of +1s and -1s which indicate if your effect alleles did match (+1) or did not match (-1) the effect alleles in the LD reference panel. Effect alleles must match for later inference. If they don't simply multiply your Z-statistics, for SNPs present in the LD reference panel (see row/column names of \code{ld}), by \code{signment} element-wise.
 }
