@@ -342,8 +342,18 @@ gent_genomewide=function(gwas,
                          return_snp_gene_pairs=FALSE) {
   if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
   setwd(ld_directory)
-  gwas=gwas %>% na.omit()
-  gwas=gwas %>% rename(rsid=!!sym(snp), chr=!!sym(chromosome), position=!!sym(position), effect_allele=!!sym(effect_allele), z=!!sym(z_statistic))
+  gwas=gwas %>%
+    dplyr::select(!!sym(snp),
+                  !!sym(chromosome),
+                  !!sym(position),
+                  !!sym(effect_allele),
+                  !!sym(z_statistic)) %>%
+    na.omit() %>%
+    rename(rsid=!!sym(snp),
+           chr=!!sym(chromosome),
+           position=!!sym(position),
+           effect_allele=!!sym(effect_allele),
+           z=!!sym(z_statistic))
   chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
   chrs=intersect(1:22,chrs)
   sgp=list()
@@ -497,12 +507,18 @@ mugent_genomewide=function(
   for(i in 1:k) {
     gwas=gwas_list[[i]]
     gwas=gwas %>% tidyr::drop_na()
-    gwas=gwas %>% select(
-      rsid=!!sym(snp_list[[i]]),
-      chr=!!sym(chromosome_list[[i]]),
-      position=!!sym(position_list[[i]]),
-      effect_allele=!!sym(effect_allele_list[[i]]),
-      z=!!sym(z_statistic_list[[i]]))
+    gwas=gwas %>%
+      dplyr::select(
+        !!sym(snp_list[[i]]),
+        !!sym(chromosome_list[[i]]),
+        !!sym(position_list[[i]]),
+        !!sym(effect_allele_list[[i]]),
+        !!sym(z_statistic_list[[i]])) %>%
+      dplyr::rename(rsid=!!sym(snp_list[[i]]),
+                    chr=!!sym(chromosome_list[[i]]),
+                    position=!!sym(position_list[[i]]),
+                    effect_allele=!!sym(effect_allele_list[[i]]),
+                    z=!!sym(z_statistic_list[[i]]))
     if(i==1) used_snps=gwas$rsid else used_snps=intersect(used_snps,gwas$rsid)
     gwas_list[[i]]=gwas %>% filter(rsid %in% used_snps)
   }
@@ -814,8 +830,15 @@ wgent_genomewide=function(gwas,
                           return_snp_gene_pairs=FALSE) {
   if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
   setwd(ld_directory)
-  gwas=gwas %>% na.omit()
   gwas=gwas %>%
+    dplyr::select(!!sym(snp),
+                  !!sym(chromosome),
+                  !!sym(position),
+                  !!sym(effect_allele),
+                  !!sym(effect_size),
+                  !!sym(standard_error),
+                  !!sym(snp_weights)) %>%
+    na.omit() %>%
     rename(rsid=!!sym(snp),
            chr=!!sym(chromosome),
            position=!!sym(position),
