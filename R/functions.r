@@ -3,8 +3,9 @@
 #' This function performs a single gene-based association test.
 #' @param zs vector of SNP-specific Z-statistics from GWAS whose indices correspond to those of \code{LD}
 #' @param LD LD matrix whose row/column indices correspond to the indices of \code{zs}
-#' @param mafs Minor allele frequencies of the SNPs whose Z-statistics are in \code{zs} (in corresponding order). If non-null, inverse 2MAF(1-MAF) weights will be aplied.
-#' @param chisquares if you instead give chi-square statistics (squared Z-statistics), supply them here and leave \code{zs} empty
+#' @param A A weight matrix which forms the quadratic form \code{zs}'(A^2)\code{zs}. Equivalent to setting zs<-A%*%zs. Weights SNPs in gene-based testing.
+#' @param xqtl_Z An m x p matrix of xQTL effect sizes (e.g., Z-statistics). Rows correspond to SNPs; columns correspond to tissues or xQTL types.
+#' @param chisquares SNP chi-square statistics. If you supply a value for this and leave \code{A} and \code{xqtl_Z} empty, it is equivalent to supplying \code{zs} and \code{LD}.
 #' @return A list with these components:
 #' \itemize{
 #'  \item \code{pval}: P-value for testing H0: gene is not associated with trait.
@@ -20,55 +21,34 @@
 #' LD=cov2cor(rWishart(1,100,diag(5))[,,1])
 #' z=c(mvnfast::rmvn(1,rep(0,5),diag(5)))
 #' gent(z,LD)
-gent=function (zs = NULL, LD, mafs = NULL, xqtl_Z = NULL, chisquares = NULL) {
-  if (is.null(mafs) & is.null(xqtl_Z)) {
-    mu = nrow(LD)
+gent=function (zs = NULL, LD, A = NULL, xqtl_Z = NULL, chisquares = NULL) {
+  if (is.null(A) & is.null(xqtl_Z)) {
+    mu = tr(LD)
     trASAS = tr(LD %*% LD)
+    y = sum(zs^2)
   }
-  else if (!is.null(mafs) & is.null(xqtl_Z)) {
-    mafs = c(mafs)
-    if (length(mafs) != length(zs))
-      stop("length of MAF vector not equal to length of Z-statistic vector")
-    mafs = 2 * mafs * (1 - mafs)
-    A = diag(1/mafs)
-    mu = sum(diag(A %*% LD))
+  else if (!is.null(A) & is.null(xqtl_Z)) {
+    mu = tr(A %*% LD)
     trASAS = tr(A %*% LD %*% A %*% LD)
-    sigma2 = 2 * trASAS
-    mu_h1 = mu + t(zs) %*% A %*% zs
-    sigma2_h1 = sigma2 + 4 * t(zs) %*% A %*% LD %*% A %*% zs
-    beta = mu/sigma2
-    alpha = mu * beta
     y = c(t(zs) %*% A %*% zs)
-    pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
-    out=list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
-             sigma2_h0 = sigma2)
-    out=lapply(out,c)
-    return(out)
   }
-  else if (is.null(mafs) & !is.null(xqtl_Z)) {
+  else if (is.null(A) & !is.null(xqtl_Z)) {
     xqtl_Z = as.matrix(xqtl_Z)
     m = nrow(xqtl_Z)
     p = ncol(xqtl_Z)
-    L = matrix(0, m, m)
-    for (o in 1:p) L = L + xqtl_Z[, o] %*% t(xqtl_Z[, o])
-    L = L/sqrt(m * p)
-    mu = sum(diag(L %*% LD))
+    L = diag(c(rowSums(xqtl_Z^2)))/sqrt(m * p)
+    mu = tr(L %*% LD)
     trASAS = tr(L %*% LD %*% L %*% LD)
+    y = c(t(zs) %*% L %*% zs)
   }
+  if (!is.null(chisquares)) y = sum(chisquares)
   sigma2 = 2 * trASAS
-  beta = (mu/trASAS)/2
+  beta = mu/sigma2
   alpha = beta * mu
-  if (!is.null(chisquares))
-    y = sum(chisquares)
-  else y = sum(zs^2)
-  mu_h1 = mu + y
-  if (!is.null(zs))
-    sigma2_h1 = sigma2 + 4 * t(zs) %*% LD %*% zs
-  else sigma2_h1 = NULL
   pval = pgamma(y, shape = alpha, rate = beta, lower.tail = FALSE)
-  out = list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu,
-             sigma2_h0 = sigma2)
-  lapply(out, c)
+  out=list(pval = pval, shape = alpha, rate = beta, mu_h0 = mu, sigma2_h0 = sigma2)
+  out=lapply(out,c)
+  return(out)
 }
 
 #' Multi-ancestry gene-based association test (MuGenT)
@@ -624,7 +604,7 @@ mugent_genomewide=function(
   }
   outlist=list('MuGenT'=rdf1, 'MuGenT-PH'=rdf2, 'MuGenT-Pleiotropy'=rdf3)
   if(return_snp_gene_pairs) outlist$snp_sets=sgp
-  
+
 }
 
 #' Fine-mapping gene-based association test statistics
@@ -768,3 +748,167 @@ gent_finemap=function(
   return(rdf)
 }
 
+
+
+
+
+#' Genome-wide inverse MAF-weighted gene-based association test
+#'
+#' This function performs gene-based association testing genome-wide using weights.
+#' @param gwas GWAS summary statistics
+#' @param snp_weights Column name in \code{gwas} indicating SNP weights (e.g., square root of inverse of MAF)
+#' @param KbWindow Kilobase window used to assign SNPs to genes
+#' @param ld_population LD population, one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR'
+#' @param ld_directory Relative or absolute filepath to LD directory (see Github Wiki)
+#' @param snp Column name of SNP rsID in GWAS data
+#' @param chromosome Column name of SNP chromosome in GWAS data
+#' @param position Column name of SNP hg19 base pair position in GWAS data
+#' @param effect_allele Column name of SNP effect allele in GWAS data
+#' @param effect_size Column name of SNP estimated effect size in GWAS data
+#' @param standard_error Column name of SNP standard error in GWAS data
+#' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
+#' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
+#' @param return_snp_gene_pairs If TRUE, will return a chromosome-specific list of tested gene-specific SNP sets annotated by gene
+#' @return A dataframe with these components:
+#' \itemize{
+#'  \item `pval`: P-value testing the gene-based null hypothesis
+#'  \item `shape`: Shape parameter of the Gamma null distribution
+#'  \item `rate`: Rate parameter of the Gamma null distribution
+#'  \item `mu_h0`: Expected value of the gene-based test statistic under the null hypothesis
+#'  \item `sigma2_h0`: Variance of the gene-based test statistic under the null hypothesis
+#'  \item `gene`: Gene symbol
+#'  \item `m`: Number of SNPs tested in gene-specific set
+#'  \item `chr`: Chromosome of gene
+#'  \item `gene_start`: Start position of gene (Ensembl hg19)
+#'  \item `window_start`: Start position of window in which SNPs were captured for this gene (hg19)
+#'  \item `gene_end`: End position of gene (Ensembl hg19)
+#'  \item `window_end`: End position of window in which SNPs were captured for this gene (hg19)
+#' }
+#'
+#' @export
+#' @examples
+#' # Example for Alzheimer's disease GWAS data
+#' gent_genomewide(
+#'   gwas=ad_gwas,
+#'   snp_weights='sqrt_inverse_mafs',
+#'   ld_population='EUR',
+#'   ld_directory='ld_matrices',
+#'   KbWindow=50,
+#'   snp='MarkerName',
+#'   chromosome='Chromosome',
+#'   position='Position',
+#'   effect_allele='Effect_allele',
+#'   effect_size='beta',
+#'   standard_error='se',
+#'   verbose=TRUE,
+#'   return_snp_gene_pairs=FALSE)
+wgent_genomewide=function(gwas,
+                          snp_weights='weights',
+                          KbWindow=50,
+                          ld_population='EUR',
+                          ld_directory='ld_directory',
+                          snp='rsid',
+                          chromosome='chr',
+                          position='position',
+                          effect_allele='effect_allele',
+                          effect_size='beta',
+                          standard_error='se',
+                          index=NULL,
+                          verbose=TRUE,
+                          return_snp_gene_pairs=FALSE) {
+  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  setwd(ld_directory)
+  gwas=gwas %>% na.omit()
+  gwas=gwas %>%
+    rename(rsid=!!sym(snp),
+           chr=!!sym(chromosome),
+           position=!!sym(position),
+           effect_allele=!!sym(effect_allele),
+           effect_size=!!sym(effect_size),
+           standard_error=!!sym(standard_error),
+           weight=!!sym(snp_weights))
+  chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
+  chrs=intersect(1:22,chrs)
+  sgp=list()
+  rdf=data.frame()
+  for(cc in 1:length(chrs)) {
+    setwd(ld_directory)
+    setwd(ld_population)
+    setwd(paste0('chr',cc))
+    if(verbose) cat('Starting chromosome', chrs[cc], '\n')
+    gwas_chr=gwas %>% filter(chr==chrs[cc])
+    index_chr=index %>% filter(chr==cc)
+    genes=unique(index_chr$symbol)
+    #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    k=0
+    chrlist=list()
+    for(i in 1:length(genes)) {
+      #if(verbose) setTxtProgressBar(pb, i)
+      tryCatch(
+        {
+          # check up front that the data contains at least one SNP for this gene
+          starti=index_chr %>% filter(symbol==genes[i]) %>% select(start) %>% head(.,1) %>% pull()
+          endi=index_chr %>% filter(symbol==genes[i]) %>% select(end) %>% head(.,1) %>% pull()
+          starti=starti-KbWindow*1e3
+          endi=endi+KbWindow*1e3
+          gwas_chri=gwas_chr %>% filter(position>starti,position<endi)
+          if(nrow(gwas_chri)==0) stop()
+          # then proceed to load LD
+          genefp=paste0(genes[i],'.Rds')
+          if(!file.exists(genefp)) stop()
+          ld=readRDS(genefp)
+          ldrn=rownames(ld)
+          spp=sapply(ldrn,\(.) unlist(strsplit(.,'_')))
+          ld_df=t(spp) %>% as.data.frame() %>% rename(rsid=V1,a1=V2)
+          ldrn=ld_df$rsid
+          usesnps=intersect(ldrn,gwas_chri$rsid)
+          gwas_chri=gwas_chri %>%
+            filter(rsid %in% usesnps) %>%
+            distinct(rsid,.keep_all=TRUE) %>%
+            arrange(position) %>%
+            left_join(ld_df,by='rsid') %>%
+            mutate(effect_size=ifelse(effect_allele==a1,effect_size,-effect_size))
+          betahat=gwas_chri %>% pull(effect_size)
+          se=gwas_chri %>% pull(standard_error)
+          w=gwas_chri %>% pull(weight)
+          # make sure data contains SNPs for this gene
+          if(length(betahat)==0) stop()
+          rownames(ld)=colnames(ld)=ldrn
+          ld=ld[gwas_chri$rsid,gwas_chri$rsid]
+          # transform LD to be covariance matrix of estimated effect sizes (the math works out)
+          D=diag(c(se))
+          W=diag(c(w))
+          result=gent(zs=betahat,LD=D%*%ld%*%D,A=W^2) # squared bc weighted version is W%*%betahat
+          result_unweighted=gent(zs=betahat/se,LD=ld)
+          toadd=as.data.frame(result) %>%
+            mutate(gene=genes[i],
+                   m=nrow(ld),
+                   chr=chrs[cc],
+                   gene_start=starti+KbWindow*1e3,
+                   window_start=starti,
+                   gene_end=endi-KbWindow*1e3,
+                   window_end=endi) %>%
+            mutate(pval_unweighted=result_unweighted$pval)
+          rdf=rbind(rdf,toadd)
+          # record SNP-gene pairs
+          k=k+1
+          if(return_snp_gene_pairs) {
+            chrlist[[k]]=paste(gwas_chri$rsid,collapse=',')
+            names(chrlist)[k]=genes[i]
+          }
+        },
+        error=function(x) NA
+      )
+    }
+    #close(pb)
+    if(return_snp_gene_pairs) {
+      sgp[[cc]]=chrlist
+      names(sgp)[[cc]]=paste0('chr',chrs[cc])
+    }
+  }
+  if(return_snp_gene_pairs) {
+    return(list(result=as_tibble(rdf),snp_sets=sgp))
+  } else {
+    return(as_tibble(rdf))
+  }
+}
