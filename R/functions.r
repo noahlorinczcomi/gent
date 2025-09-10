@@ -414,11 +414,9 @@ gent_genomewide=function(gwas,
       names(sgp)[[cc]]=paste0('chr',chrs[cc])
     }
   }
-  if(return_snp_gene_pairs) {
-    return(list(result=as_tibble(rdf),snp_sets=sgp))
-  } else {
-    return(as_tibble(rdf))
-  }
+  outlist=result=as_tibble(rdf)
+  if(return_snp_gene_pairs) outlist$snp_sets=sgp
+  return(outlist)
 }
 
 #' Genome-wide multi-trait/ancestry gene-based association test (MuGenT)
@@ -620,7 +618,7 @@ mugent_genomewide=function(
   }
   outlist=list('MuGenT'=rdf1, 'MuGenT-PH'=rdf2, 'MuGenT-Pleiotropy'=rdf3)
   if(return_snp_gene_pairs) outlist$snp_sets=sgp
-
+  return(outlist)
 }
 
 #' Fine-mapping gene-based association test statistics
@@ -925,11 +923,9 @@ wgent_genomewide=function(gwas,
       names(sgp)[[cc]]=paste0('chr',chrs[cc])
     }
   }
-  if(return_snp_gene_pairs) {
-    return(list(result=as_tibble(rdf),snp_sets=sgp))
-  } else {
-    return(as_tibble(rdf))
-  }
+  outlist=result=as_tibble(rdf)
+  if(return_snp_gene_pairs) outlist$snp_sets=sgp
+  return(outlist)
 }
 
 #' Clumping of gene-based test statistics
