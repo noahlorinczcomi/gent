@@ -57,7 +57,7 @@ gent=function (zs = NULL, LD, A = NULL, xqtl_Z = NULL, chisquares = NULL) {
 #' @param Z matrix of Z-statistics from GWAS. Rows are SNPs and columns are populations.
 #' @param ldlist list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}
 #' @return
-#' \itemize {
+#' \itemize{
 #' \item \code{pval}: P-value for testing H0: gene is not associated with trait.
 #' \item \code{shape}: shape parameter of null (Gamma) distribution.
 #' \item \code{rate}: rate parameter of null (Gamma) distribution.
@@ -126,7 +126,7 @@ multipop_anova=function(effect_size_matrix,standard_error_matrix) {
 #' @param Z matrix of Z-statistics from GWAS. Rows are SNPs and columns are populations.
 #' @param ldlist list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}
 #' @return
-#' \itemize {
+#' \itemize{
 #' \item \code{pval}: P-value for testing H0: gene is not associated with trait.
 #' \item \code{shape}: shape parameter of null (Gamma) distribution.
 #' \item \code{rate}: rate parameter of null (Gamma) distribution.
@@ -167,7 +167,7 @@ mugent_ph=function(Z,ldlist) {
 #' @param ldlist list of population-specific LD matrices whose ordering corresponds to the column ordering of \code{Z}
 #' @param alpha the nominal (uncorrected) significance threshold for testing a single gene. If testing all genes genome-wide, this should be less than the threshold for testing a single gene.
 #' @return
-#' \itemize {
+#' \itemize{
 #' \item \code{result}: An indication if H0 (the gene is not association in all populations/with all traits) can be rejected. 'Pleiotropy' if it is rejected and 'no pleiotropy' otherwise.
 #' \item \code{adjusted_significance_quantile}: The chi-square quantile of the adjusted nominal significance threshold for inferring H1 given the number of SNPs used and populations/traits tested.
 #' }
@@ -226,7 +226,7 @@ mugent_sel=function(Z,ldlist,verbose=T) {
 #' @param plink_exec command to execute PLINK from the command line, typically just 'plink'.
 #' @param verbose should a statement about your effect alleles and those in the LD reference be printed to the console?
 #' @return
-#' \itemize {
+#' \itemize{
 #' \item \code{ld}: LD matrix. Rows and columns are in the original order provided to this function, filtered to only those present in the LD reference.
 #' \item \code{signmat}: This is a vector of +1s and -1s which indicate if your effect alleles did match (+1) or did not match (-1) the effect alleles in the LD reference panel. Effect alleles must match for later inference. If they don't simply multiply your Z-statistics, for SNPs present in the LD reference panel (see row/column names of \code{ld}), by \code{signment} element-wise.
 #' }
