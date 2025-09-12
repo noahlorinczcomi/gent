@@ -721,6 +721,7 @@ gent_finemap=function(
       verbose=FALSE)
     use_genes=names(clumps)
   }
+  if(length(use_genes)==0) {cat('no significant loci detected\n');return(data.frame())}
   # 2) now perform fine-mapping using selected genes as input loci
   rdf=data.frame()
   for(i in 1:length(use_genes)) {
@@ -735,8 +736,9 @@ gent_finemap=function(
     # correlation matrix for these genes
     ldgenes=intersect(gent_resultsi$gene,rownames(gent_ld_chr))
     gent_resultsi=gent_resultsi %>% filter(gene %in% ldgenes)
-    gent_ldi=gent_ld_chr[gent_resultsi$gene,gent_resultsi$gene]
+    gent_ldi=gent_ld_chr[gent_resultsi$gene,gent_resultsi$gene,drop=FALSE]
     m=nrow(gent_ldi)
+    if(m<2) next
     gent_ldi=(1-R_ridge_penalty)*gent_ldi+R_ridge_penalty*diag(m)
     # apply fine-mapping here
     fit=suppressWarnings(susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,verbose=FALSE,...))
