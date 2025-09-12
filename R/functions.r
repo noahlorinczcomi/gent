@@ -707,7 +707,7 @@ gent_finemap=function(
     use_genes=index$symbol
   } else {
     # find index genes using clump procedure
-    if(verbose) message('\nclumping genes to identify loci')
+    if(verbose) message('clumping genes to identify loci')
     clumps=gene_clump(
       gent_results,
       ld_population,
@@ -735,14 +735,13 @@ gent_finemap=function(
     gent_resultsi=gent_results %>% filter(data.table::between(gene_start,indexbp[1],indexbp[2]))
     # correlation matrix for these genes
     ldgenes=intersect(gent_resultsi$gene,rownames(gent_ld_chr))
-    gent_resultsi=gent_resultsi %>% filter(gene %in% ldgenes)
+    gent_resultsi=gent_resultsi %>% filter(gene %in% ldgenes,!is.infinite(a))
     gent_ldi=gent_ld_chr[gent_resultsi$gene,gent_resultsi$gene,drop=FALSE]
     m=nrow(gent_ldi)
     if(m<2) next
     gent_ldi=(1-R_ridge_penalty)*gent_ldi+R_ridge_penalty*diag(m)
     # apply fine-mapping here
     fit=suppressWarnings(susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,verbose=FALSE,...))
-    # fit=susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,verbose=FALSE,...)
     # assign credible sets to each SNP
     cs=rep(NA,m)
     if(!is.null(fit$sets$cs)) for(o in 1:length(fit$sets$cs)) cs[fit$sets$cs[[o]]]=o
