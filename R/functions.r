@@ -332,6 +332,7 @@ gent_genomewide=function(gwas,
                          KbWindow=50,
                          ld_population='EUR',
                          ld_directory='ld_directory',
+                         build='grch37',
                          snp='rsid',
                          chromosome='chr',
                          position='position',
@@ -340,7 +341,17 @@ gent_genomewide=function(gwas,
                          index=NULL,
                          verbose=TRUE,
                          return_snp_gene_pairs=FALSE) {
-  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  build=as.character(build)
+  build37=grepl('37',build) | grepl('19',build)
+  if(is.null(index)) {
+    if(build37) {
+      data(EnsemblHg19GenePos)
+      index=EnsemblHg19GenePos
+    } else {
+      data(EnsemblHg38GenePos)
+      index=EnsemblHg38GenePos
+    }
+  }
   setwd(ld_directory)
   gwas=gwas %>%
     dplyr::select(!!sym(snp),
@@ -486,6 +497,7 @@ mugent_genomewide=function(
     gwas_list,
     ld_population_list,
     ld_directory='ld_directory',
+    build='grch37',
     KbWindow=50,
     snp_list=lapply(1:length(gwas_list),'rsid'),
     chromosome_list=lapply(1:length(gwas_list),'chr'),
@@ -496,7 +508,17 @@ mugent_genomewide=function(
     index=NULL,
     verbose=TRUE,
     return_snp_gene_pairs=FALSE) {
-  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  build=as.character(build)
+  build37=grepl('37',build) | grepl('19',build)
+  if(is.null(index)) {
+    if(build37) {
+      data(EnsemblHg19GenePos)
+      index=EnsemblHg19GenePos
+    } else {
+      data(EnsemblHg38GenePos)
+      index=EnsemblHg38GenePos
+    }
+  }
   # clean each GWAS
   k=length(gwas_list)
   used_snps=c()
@@ -814,6 +836,7 @@ wgent_genomewide=function(gwas,
                           KbWindow=50,
                           ld_population='EUR',
                           ld_directory='ld_directory',
+                          build='grch37',
                           snp='rsid',
                           chromosome='chr',
                           position='position',
@@ -823,7 +846,17 @@ wgent_genomewide=function(gwas,
                           index=NULL,
                           verbose=TRUE,
                           return_snp_gene_pairs=FALSE) {
-  if(is.null(index)) {data(EnsemblHg19GenePos);index=EnsemblHg19GenePos}
+  build=as.character(build)
+  build37=grepl('37',build) | grepl('19',build)
+  if(is.null(index)) {
+    if(build37) {
+      data(EnsemblHg19GenePos)
+      index=EnsemblHg19GenePos
+    } else {
+      data(EnsemblHg38GenePos)
+      index=EnsemblHg38GenePos
+    }
+  }
   setwd(ld_directory)
   gwas=gwas %>%
     dplyr::select(!!sym(snp),
