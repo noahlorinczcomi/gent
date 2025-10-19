@@ -289,6 +289,7 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
 #' @param KbWindow Kilobase window used to assign SNPs to genes
 #' @param ld_population LD population, one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR'
 #' @param ld_directory Relative or absolute filepath to LD directory (see Github Wiki)
+#' @param build genomic build of your GWAS data. One of hg19, hg38, grch37, grch38 (case insensitive)
 #' @param snp Column name of SNP rsID in GWAS data
 #' @param chromosome Column name of SNP chromosome in GWAS data
 #' @param position Column name of SNP hg19 base pair position in GWAS data
@@ -320,6 +321,7 @@ ld=function(rsids,effect_alleles,ld_ref_file=NULL,writeable_directory=getwd(),pl
 #'   gwas=ad_gwas,
 #'   ld_population='EUR',
 #'   ld_directory='ld_matrices',
+#'   build='grch37',
 #'   KbWindow=50,
 #'   snp='MarkerName',
 #'   chromosome='Chromosome',
@@ -341,6 +343,9 @@ gent_genomewide=function(gwas,
                          index=NULL,
                          verbose=TRUE,
                          return_snp_gene_pairs=FALSE) {
+  # configure directories
+  ld_directory=normalizePath(ld_directory)
+  # check build
   build=as.character(build)
   build37=grepl('37',build) | grepl('19',build)
   if(is.null(index)) {
@@ -352,7 +357,6 @@ gent_genomewide=function(gwas,
       index=EnsemblHg38GenePos
     }
   }
-  setwd(ld_directory)
   gwas=gwas %>%
     dplyr::select(!!sym(snp),
                   !!sym(chromosome),
@@ -366,23 +370,27 @@ gent_genomewide=function(gwas,
            effect_allele=!!sym(effect_allele),
            z=!!sym(z_statistic))
   chrs=gwas %>% select(chr) %>% pull() %>% unique() %>% as.numeric() %>% na.omit() %>% sort()
-  chrs=intersect(1:22,chrs)
   sgp=list()
   rdf=data.frame()
   for(cc in 1:length(chrs)) {
     setwd(ld_directory)
     setwd(ld_population)
-    setwd(paste0('chr',cc))
-    if(verbose) cat('Starting chromosome', chrs[cc], '\n')
+    setwd(paste0('chr',chrs[cc]))
     gwas_chr=gwas %>% filter(chr==chrs[cc])
-    index_chr=index %>% filter(chr==cc)
+    index_chr=index %>% filter(chr==chrs[cc])
     genes=unique(index_chr$symbol)
-    #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    ngenes=length(genes)
+    geneix=round(seq(0,ngenes,length.out=11))
+    npassed=0
     chrlist=list()
-    for(i in 1:length(genes)) {
-      #if(verbose) setTxtProgressBar(pb, i)
+    for(i in 1:ngenes) {
       tryCatch(
         {
+          if(verbose) {
+            cat(sprintf("\rChromosome %d (Gene %d / %d) (%d skipped)", chrs[cc], i, ngenes, i-1-npassed))
+            flush.console()
+          }
+          if(i==ngenes) cat('\n')
           # check up front that the data contains at least one SNP for this gene
           starti=index_chr %>% filter(symbol==genes[i]) %>% select(start) %>% head(.,1) %>% pull()
           endi=index_chr %>% filter(symbol==genes[i]) %>% select(end) %>% head(.,1) %>% pull()
@@ -408,6 +416,7 @@ gent_genomewide=function(gwas,
           result=gent(z,ld)
           toadd=as.data.frame(result) %>% mutate(gene=genes[i],m=nrow(ld),chr=chrs[cc],gene_start=starti+KbWindow*1e3,window_start=starti,gene_end=endi-KbWindow*1e3,window_end=endi)
           rdf=rbind(rdf,toadd)
+          npassed=npassed+1
           # record SNP-gene pairs
           if(return_snp_gene_pairs) {
             chrlist[[i]]=paste(gwas_chri$rsid,collapse=',')
@@ -435,6 +444,7 @@ gent_genomewide=function(gwas,
 #' @param KbWindow Kilobase window used to assign SNPs to genes
 #' @param ld_population_list List of LD populations (see Github Wiki)
 #' @param ld_directory Relative or absolute filepath to LD directory (see Github Wiki)
+#' @param build genomic build of your GWAS data. One of hg19, hg38, grch37, grch38 (case insensitive)
 #' @param snp_list List of column names of SNP rsIDs in GWAS datasets
 #' @param chromosome_list List of column name of SNP chromosomes in GWAS datasets
 #' @param position_list List of column name of SNP hg19 base pair positions in GWAS datasetes
@@ -485,6 +495,7 @@ gent_genomewide=function(gwas,
 #'   gwas_list = list(EUR=eur_gwas, AFR=afr_gwas),
 #'   ld_population_list = list(EUR='EUR', AFR='AFR'),
 #'   ld_directory = 'ld_matrices',
+#'   build 'grch37',
 #'   KbWindow = 50,
 #'   snp_list = list(EUR='rsid', AFR='rsid'),
 #'   chromosome_list = list(EUR='#CHR', AFR='#CHR'),
@@ -508,6 +519,9 @@ mugent_genomewide=function(
     index=NULL,
     verbose=TRUE,
     return_snp_gene_pairs=FALSE) {
+  # configure directories
+  ld_directory=normalizePath(ld_directory)
+  # check genomic build
   build=as.character(build)
   build37=grepl('37',build) | grepl('19',build)
   if(is.null(index)) {
@@ -549,20 +563,20 @@ mugent_genomewide=function(
   rdf1=rdf2=rdf3=data.frame()
   for(cc in 1:length(chrs)) {
     chrlist=list()
-    if(verbose) cat('Chromosome',chrs[cc],'\n')
     # subset GWAS to this chromosome
     gwas_chr=lapply(gwas_list,function(h) h %>% filter(chr==chrs[cc]))
     ## load LD matrices (about 0.5 gb per chromsome per population)
-    # setwd('~/isilon/Cheng-Noah/reference_data/ld_matrices/chr_specific_files')
-    # ld_list=lapply(1:k,\(.) readRDS(paste0(ld_population_list[[.]],'/chr',cc,'.Rds')))
-    # ld_list is a length-k list. each entry is a list whose entries are gene-specific LD matrices
     index_chr=index %>% filter(chr==chrs[cc])
     genes=unique(index_chr$symbol)
-    #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    npassed=0
     for(i in 1:length(genes)) {
-      #if(verbose) setTxtProgressBar(pb, i)
-      beep=tryCatch(
+      tryCatch(
         {
+          if(verbose) {
+            cat(sprintf("\rChromosome %d (Gene %d / %d) (%d skipped)", chrs[cc], i, ngenes, i-1-npassed))
+            flush.console()
+          }
+          if(i==ngenes) cat('\n')
           # load gene-specific LD matrices (more memory efficient than loading all genes at once)
           ldi=lapply(names(ld_population_list),function(h) {
             setwd(ld_directory)
@@ -580,7 +594,6 @@ mugent_genomewide=function(
             do.call(rbind,spp) %>% as.data.frame() %>% rename(rsid=V1,a1=V2)
           })
           ## overlapping SNPs in LD matrices
-          #   ldi=lapply(ld_list,function(h) h[[which(names(h)==genes[i])]])
           ldsnps=list(); for(o in 1:k) ldsnps[[o]]=unname(sapply(rownames(ldi[[o]]),function(h) unlist(strsplit(h,'_'))[1]))
           tt=table(unlist(ldsnps))
           ldsnps=names(tt[tt==k])
@@ -618,6 +631,7 @@ mugent_genomewide=function(
           rdf1=rbind(rdf1,l1)
           rdf2=rbind(rdf2,l2)
           rdf3=rbind(rdf3,l3)
+          npassed=npassed+1
           # record SNP-gene pairs
           if(return_snp_gene_pairs) {
             chrlist[[i]]=paste(gwas_chri$rsid,collapse=',')
@@ -626,7 +640,6 @@ mugent_genomewide=function(
         },
         error=function(x) NA
       )
-      # if(is.logical(beep)) cat(i,'\n')
     }
     #close(pb)
     if(return_snp_gene_pairs) {
@@ -789,6 +802,7 @@ gent_finemap=function(
 #' @param KbWindow Kilobase window used to assign SNPs to genes
 #' @param ld_population LD population, one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR'
 #' @param ld_directory Relative or absolute filepath to LD directory (see Github Wiki)
+#' @param build genomic build of your GWAS data. One of hg19, hg38, grch37, grch38 (case insensitive)
 #' @param snp Column name of SNP rsID in GWAS data
 #' @param chromosome Column name of SNP chromosome in GWAS data
 #' @param position Column name of SNP hg19 base pair position in GWAS data
@@ -822,6 +836,7 @@ gent_finemap=function(
 #'   snp_weights='sqrt_inverse_mafs',
 #'   ld_population='EUR',
 #'   ld_directory='ld_matrices',
+#'   build='grch37',
 #'   KbWindow=50,
 #'   snp='MarkerName',
 #'   chromosome='Chromosome',
@@ -846,6 +861,9 @@ wgent_genomewide=function(gwas,
                           index=NULL,
                           verbose=TRUE,
                           return_snp_gene_pairs=FALSE) {
+  # configure directories
+  ld_directory=normalizePath(ld_directory)
+  # confirm build
   build=as.character(build)
   build37=grepl('37',build) | grepl('19',build)
   if(is.null(index)) {
@@ -857,7 +875,6 @@ wgent_genomewide=function(gwas,
       index=EnsemblHg38GenePos
     }
   }
-  setwd(ld_directory)
   gwas=gwas %>%
     dplyr::select(!!sym(snp),
                   !!sym(chromosome),
@@ -882,16 +899,19 @@ wgent_genomewide=function(gwas,
     setwd(ld_directory)
     setwd(ld_population)
     setwd(paste0('chr',cc))
-    if(verbose) cat('Starting chromosome', chrs[cc], '\n')
     gwas_chr=gwas %>% filter(chr==chrs[cc])
     index_chr=index %>% filter(chr==cc)
     genes=unique(index_chr$symbol)
-    #pb=txtProgressBar(min=0,max=length(genes),style=3)
+    npassed=0
     chrlist=list()
     for(i in 1:length(genes)) {
       #if(verbose) setTxtProgressBar(pb, i)
       tryCatch(
         {
+          if(verbose) {
+            cat(sprintf("\rChromosome %d (Gene %d / %d) (%d skipped)", chrs[cc], i, ngenes, i-1-npassed))
+            flush.console()
+          }
           # check up front that the data contains at least one SNP for this gene
           starti=index_chr %>% filter(symbol==genes[i]) %>% select(start) %>% head(.,1) %>% pull()
           endi=index_chr %>% filter(symbol==genes[i]) %>% select(end) %>% head(.,1) %>% pull()
@@ -936,6 +956,7 @@ wgent_genomewide=function(gwas,
                    window_end=endi) %>%
             mutate(pval_unweighted=result_unweighted$pval)
           rdf=rbind(rdf,toadd)
+          npassed=npassed+1
           # record SNP-gene pairs
           if(return_snp_gene_pairs) {
             chrlist[[i]]=paste(gwas_chri$rsid,collapse=',')
