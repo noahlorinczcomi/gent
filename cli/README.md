@@ -2,6 +2,26 @@
 
 Command-line interface for **gent** — Gene-based Association Testing using GWAS summary statistics.
 
+## TL;DR
+
+```bash
+git clone https://github.com/noahlorinczcomi/gent.git
+cd cli
+pixi install
+pixi run fetch-ld EUR ./ld_matrices
+pixi run gent \
+  --gwas ~/data/my_gwas.tsv \
+  --ld-dir ~/data/ld_matrices \
+  --ld-pop EUR \
+  --build grch37 \
+  --snp MarkerName \
+  --chr Chromosome \
+  --pos Position \
+  --ea Effect_allele \
+  --z z \
+  --out results/gent_output.csv
+```
+
 ## Requirements
 
 - [Git](https://git-scm.com/)
