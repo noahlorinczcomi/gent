@@ -495,14 +495,14 @@ gent_genomewide=function(gwas,
 #'   gwas_list = list(EUR=eur_gwas, AFR=afr_gwas),
 #'   ld_population_list = list(EUR='EUR', AFR='AFR'),
 #'   ld_directory = 'ld_matrices',
-#'   build 'grch37',
+#'   build = 'grch37',
 #'   KbWindow = 50,
 #'   snp_list = list(EUR='rsid', AFR='rsid'),
 #'   chromosome_list = list(EUR='#CHR', AFR='#CHR'),
 #'   position_list = list(EUR='POS', AFR='POS'),
 #'   effect_allele_list = list(EUR='ALT', AFR='ALT'),
 #'   z_statistic_list = list(EUR='z', AFR='z'),
-#'   verbose = TRUE.
+#'   verbose = TRUE,
 #'   return_snp_gene_pairs = FALSE)
 mugent_genomewide=function(
     gwas_list,
@@ -671,6 +671,7 @@ mugent_genomewide=function(
 #' @param clump_r2 Gene-gene squared correlation upper threshold to use when finding loci in which to perform fine-mapping (only envoked if \code{index_genes} is NULL). Genes correlated below the square root of this threshold will be considered as tagging separate loci.
 #' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
 #' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
+#' @param ... Additional arguments passed to \code{susieR::susie_rss()}.
 #' @return A dataframe with these components:
 #' \itemize{
 #'  \item `gene`: Gene symbol
@@ -984,7 +985,7 @@ wgent_genomewide=function(gwas,
 #' @param ld_population one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR' from 1000 Genomes Phase 3. Used for internal loading of GenT correlation matrices.
 #' @param chromosome Chromosome variable name in \code{genedf}
 #' @param gene_start Gene start position variable name in \code{genedf}
-#' @param symbol Gene symbol variable name in \code{genedf}
+#' @param gene_symbol Gene symbol variable name in \code{genedf}
 #' @param pval Gene-based test statistic P-value variable name in \code{genedf}
 #' @param clump_p Only genes with a P-value less than this threshold may index a locus for clumping
 #' @param clump_kb Kilobase size of the entire clumping window. Left and right windows from the index gene will be half the size of \code{clump_kb}

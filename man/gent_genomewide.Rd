@@ -9,6 +9,7 @@ gent_genomewide(
   KbWindow = 50,
   ld_population = "EUR",
   ld_directory = "ld_directory",
+  build = "grch37",
   snp = "rsid",
   chromosome = "chr",
   position = "position",
@@ -27,6 +28,8 @@ gent_genomewide(
 \item{ld_population}{LD population, one of 'EUR', 'AFR', 'EAS', 'SAS', or 'AMR'}
 
 \item{ld_directory}{Relative or absolute filepath to LD directory (see Github Wiki)}
+
+\item{build}{genomic build of your GWAS data. One of hg19, hg38, grch37, grch38 (case insensitive)}
 
 \item{snp}{Column name of SNP rsID in GWAS data}
 
@@ -70,6 +73,7 @@ gent_genomewide(
   gwas=ad_gwas,
   ld_population='EUR',
   ld_directory='ld_matrices',
+  build='grch37',
   KbWindow=50,
   snp='MarkerName',
   chromosome='Chromosome',

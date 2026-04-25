@@ -1,0 +1,36 @@
+AFRGenTStatLD           Gene-based test statistic correlations (African
+                        1000 Genomes Phase 3)
+AMRGenTStatLD           Gene-based test statistic correlations (Admixed
+                        American 1000 Genomes Phase 3)
+EASGenTStatLD           Gene-based test statistic correlations (East
+                        Asian 1000 Genomes Phase 3)
+EURGenTStatLD           Gene-based test statistic correlations
+                        (European 1000 Genomes Phase 3)
+EnsemblHg19GenePos      Ensembl hg19 coordinates of gene start and end
+                        base pair positions
+EnsemblHg38GenePos      Ensembl hg38 coordinates of gene start and end
+                        base pair positions
+SASGenTStatLD           Gene-based test statistic correlations (South
+                        Asian 1000 Genomes Phase 3)
+gene_clump              Clumping of gene-based test statistics
+gent                    Gene-based association test (GenT)
+gent_finemap            Fine-mapping gene-based association test
+                        statistics
+gent_genomewide         Genome-wide gene-based association test (GenT)
+gent_manhattan          Gene-based test Manhattan plot
+gent_qq                 Gene-based test QQ plot
+ld                      Return LD matrix for gene
+mugent                  Multi-ancestry gene-based association test
+                        (MuGenT)
+mugent_genomewide       Genome-wide multi-trait/ancestry gene-based
+                        association test (MuGenT)
+mugent_ph               Multi-ancestry gene-based association
+                        heterogeneity test (MuGenT-PH)
+mugent_pleio            Multi-ancestry joint gene-based associated test
+                        (MuGenT-Pleio)
+mugent_sel              Pairwise test of only one population with a
+                        gene association (MuGenT-Sel)
+multipop_anova          SNP-based ANOVA test for population
+                        heterogeneity
+wgent_genomewide        Genome-wide inverse MAF-weighted gene-based
+                        association test

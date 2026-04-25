@@ -1,0 +1,335 @@
+* using log directory ‘/Users/noah/Documents/github/gent/gent.Rcheck’
+* using R version 4.4.1 (2024-06-14)
+* using platform: aarch64-apple-darwin20
+* R was compiled by
+    Apple clang version 14.0.0 (clang-1400.0.29.202)
+    GNU Fortran (GCC) 12.2.0
+* running under: macOS 15.6.1
+* using session charset: UTF-8
+* using options ‘--no-manual --no-vignettes’
+* checking for file ‘gent/DESCRIPTION’ ... OK
+* this is package ‘gent’ version ‘0.1’
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘gent’ can be installed ... OK
+* checking installed package size ... NOTE
+  installed size is  7.6Mb
+  sub-directories of 1Mb or more:
+    data   7.4Mb
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Malformed Title field: should not end in a period.
+Non-standard license specification:
+  `use_mit_license()`
+Standardizable: FALSE
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking code files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking dependencies in R code ... WARNING
+'::' or ':::' import not declared from: ‘susieR’
+'library' or 'require' calls not declared from:
+  ‘data.table’ ‘dplyr’ ‘ggrepel’ ‘mvnfast’
+'library' or 'require' calls in package code:
+  ‘data.table’ ‘dplyr’ ‘ggrepel’ ‘mvnfast’
+  Please use :: or requireNamespace() instead.
+  See section 'Suggested packages' in the 'Writing R Extensions' manual.
+Namespaces in Imports field not imported from:
+  ‘mvnfast’ ‘tibble’
+  All declared Imports should be used.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+f_meff: warning in matrix(0, nr = nrow(ldlist[[1]]), nc =
+  ncol(ldlist[[1]])): partial argument match of 'nr' to 'nrow'
+f_meff: warning in matrix(0, nr = nrow(ldlist[[1]]), nc =
+  ncol(ldlist[[1]])): partial argument match of 'nc' to 'ncol'
+mixp: warning in matrix(c(unlist(alt_pars)), nr = p, nc = 2): partial
+  argument match of 'nr' to 'nrow'
+mixp: warning in matrix(c(unlist(alt_pars)), nr = p, nc = 2): partial
+  argument match of 'nc' to 'ncol'
+mixp: warning in matrix(c(unlist(null_pars)), nr = p, nc = 2): partial
+  argument match of 'nr' to 'nrow'
+mixp: warning in matrix(c(unlist(null_pars)), nr = p, nc = 2): partial
+  argument match of 'nc' to 'ncol'
+mugent_ph: warning in matrix(0, nr = m, nc = m): partial argument match
+  of 'nr' to 'nrow'
+mugent_ph: warning in matrix(0, nr = m, nc = m): partial argument match
+  of 'nc' to 'ncol'
+mugent_sel: warning in matrix(nr = p, nc = p): partial argument match
+  of 'nr' to 'nrow'
+mugent_sel: warning in matrix(nr = p, nc = p): partial argument match
+  of 'nc' to 'ncol'
+gene_clump: no visible global function definition for ‘data’
+gene_clump: no visible binding for global variable ‘EURGenTStatLD’
+gene_clump: no visible binding for global variable ‘AFRGenTStatLD’
+gene_clump: no visible binding for global variable ‘EASGenTStatLD’
+gene_clump: no visible binding for global variable ‘SASGenTStatLD’
+gene_clump: no visible binding for global variable ‘AMRGenTStatLD’
+gene_clump: no visible global function definition for ‘%>%’
+gene_clump: no visible global function definition for ‘sym’
+gene_clump: no visible binding for global variable ‘symbol’
+gene_clump: no visible binding for global variable ‘chr’
+gene_clump: no visible binding for global variable ‘d’
+gene_clump: no visible global function definition for ‘head’
+gene_clump: no visible binding for global variable ‘.’
+gene_clump: no visible global function definition for ‘filter’
+gene_clump: no visible binding for global variable ‘r2’
+gene_clump: no visible global function definition for ‘pull’
+gent: no visible global function definition for ‘pgamma’
+gent_finemap: no visible global function definition for ‘data’
+gent_finemap: no visible binding for global variable ‘EURGenTStatLD’
+gent_finemap: no visible binding for global variable ‘AFRGenTStatLD’
+gent_finemap: no visible binding for global variable ‘EASGenTStatLD’
+gent_finemap: no visible binding for global variable ‘SASGenTStatLD’
+gent_finemap: no visible binding for global variable ‘AMRGenTStatLD’
+gent_finemap: no visible binding for global variable
+  ‘EnsemblHg19GenePos’
+gent_finemap: no visible global function definition for ‘%>%’
+gent_finemap: no visible global function definition for ‘rename’
+gent_finemap: no visible global function definition for ‘sym’
+gent_finemap: no visible global function definition for ‘mutate’
+gent_finemap: no visible binding for global variable ‘rate’
+gent_finemap: no visible global function definition for ‘qgamma’
+gent_finemap: no visible binding for global variable ‘shape’
+gent_finemap: no visible binding for global variable ‘Q’
+gent_finemap: no visible global function definition for ‘filter’
+gent_finemap: no visible binding for global variable ‘symbol’
+gent_finemap: no visible global function definition for ‘head’
+gent_finemap: no visible binding for global variable ‘.’
+gent_finemap: no visible global function definition for ‘pull’
+gent_finemap: no visible binding for global variable ‘chr’
+gent_finemap: no visible binding for global variable ‘gene’
+gent_finemap: no visible binding for global variable ‘a’
+gent_finemap: no visible global function definition for ‘select’
+gent_finemap: no visible binding for global variable ‘locus_index_gene’
+gent_finemap: no visible binding for global variable ‘finemapping_pip’
+gent_finemap: no visible binding for global variable ‘finemapping_CS’
+gent_genomewide: no visible global function definition for ‘data’
+gent_genomewide: no visible binding for global variable
+  ‘EnsemblHg19GenePos’
+gent_genomewide: no visible binding for global variable
+  ‘EnsemblHg38GenePos’
+gent_genomewide: no visible global function definition for ‘%>%’
+gent_genomewide: no visible global function definition for ‘sym’
+gent_genomewide: no visible global function definition for ‘na.omit’
+gent_genomewide: no visible global function definition for ‘rename’
+gent_genomewide: no visible global function definition for ‘select’
+gent_genomewide: no visible binding for global variable ‘chr’
+gent_genomewide: no visible global function definition for ‘pull’
+gent_genomewide: no visible global function definition for ‘filter’
+gent_genomewide: no visible global function definition for
+  ‘flush.console’
+gent_genomewide: no visible binding for global variable ‘symbol’
+gent_genomewide: no visible binding for global variable ‘start’
+gent_genomewide: no visible global function definition for ‘head’
+gent_genomewide: no visible binding for global variable ‘.’
+gent_genomewide: no visible binding for global variable ‘end’
+gent_genomewide: no visible binding for global variable ‘V1’
+gent_genomewide: no visible binding for global variable ‘V2’
+gent_genomewide: no visible binding for global variable ‘rsid’
+gent_genomewide: no visible global function definition for ‘distinct’
+gent_genomewide: no visible global function definition for ‘arrange’
+gent_genomewide: no visible global function definition for ‘left_join’
+gent_genomewide: no visible global function definition for ‘mutate’
+gent_genomewide: no visible binding for global variable ‘a1’
+gent_genomewide: no visible global function definition for ‘as_tibble’
+gent_manhattan: no visible global function definition for ‘%>%’
+gent_manhattan: no visible global function definition for ‘:=’
+gent_manhattan: no visible global function definition for ‘sym’
+gent_manhattan: no visible global function definition for ‘median’
+gent_manhattan: no visible binding for global variable ‘newbp’
+gent_manhattan: no visible global function definition for ‘ggplot’
+gent_manhattan: no visible global function definition for ‘aes’
+gent_manhattan: no visible binding for global variable ‘chrcol’
+gent_manhattan: no visible global function definition for ‘geom_point’
+gent_manhattan: no visible global function definition for
+  ‘scale_color_manual’
+gent_manhattan: no visible global function definition for ‘geom_hline’
+gent_manhattan: no visible global function definition for
+  ‘scale_x_continuous’
+gent_manhattan: no visible global function definition for ‘theme_bw’
+gent_manhattan: no visible global function definition for ‘theme’
+gent_manhattan: no visible global function definition for
+  ‘element_blank’
+gent_manhattan: no visible global function definition for ‘labs’
+gent_manhattan: no visible global function definition for
+  ‘geom_text_repel’
+gent_qq: no visible global function definition for ‘na.omit’
+gent_qq: no visible global function definition for ‘ppoints’
+gent_qq: no visible global function definition for ‘%>%’
+gent_qq: no visible global function definition for ‘ggplot’
+gent_qq: no visible global function definition for ‘aes’
+gent_qq: no visible binding for global variable ‘e’
+gent_qq: no visible binding for global variable ‘o’
+gent_qq: no visible global function definition for ‘geom_point’
+gent_qq: no visible global function definition for ‘geom_abline’
+gent_qq: no visible global function definition for ‘theme_bw’
+gent_qq: no visible global function definition for ‘theme’
+gent_qq: no visible global function definition for ‘element_blank’
+gent_qq: no visible global function definition for ‘labs’
+ld: no visible global function definition for ‘%>%’
+ld: no visible global function definition for ‘filter’
+ld: no visible binding for global variable ‘chr’
+ld: no visible global function definition for ‘left_join’
+ld: no visible global function definition for ‘arrange’
+ld: no visible binding for global variable ‘rsid’
+ld: no visible binding for global variable ‘position’
+ld: no visible global function definition for ‘write.table’
+mixp: no visible global function definition for ‘dgamma’
+mugent: no visible global function definition for ‘pgamma’
+mugent_genomewide: no visible global function definition for ‘data’
+mugent_genomewide: no visible binding for global variable
+  ‘EnsemblHg19GenePos’
+mugent_genomewide: no visible binding for global variable
+  ‘EnsemblHg38GenePos’
+mugent_genomewide: no visible global function definition for ‘%>%’
+mugent_genomewide: no visible global function definition for ‘sym’
+mugent_genomewide: no visible global function definition for ‘filter’
+mugent_genomewide: no visible binding for global variable ‘rsid’
+mugent_genomewide : <anonymous>: no visible global function definition
+  for ‘%>%’
+mugent_genomewide : <anonymous>: no visible global function definition
+  for ‘filter’
+mugent_genomewide : <anonymous>: no visible binding for global variable
+  ‘rsid’
+mugent_genomewide : <anonymous>: no visible global function definition
+  for ‘pull’
+mugent_genomewide : <anonymous>: no visible binding for global variable
+  ‘chr’
+mugent_genomewide: no visible binding for global variable ‘chr’
+mugent_genomewide: no visible binding for global variable ‘ngenes’
+mugent_genomewide: no visible global function definition for
+  ‘flush.console’
+mugent_genomewide : <anonymous>: no visible global function definition
+  for ‘rename’
+mugent_genomewide : <anonymous>: no visible binding for global variable
+  ‘V1’
+mugent_genomewide : <anonymous>: no visible binding for global variable
+  ‘V2’
+mugent_genomewide: no visible global function definition for
+  ‘left_join’
+mugent_genomewide: no visible global function definition for ‘mutate’
+mugent_genomewide: no visible binding for global variable
+  ‘effect_allele’
+mugent_genomewide: no visible binding for global variable ‘a1’
+mugent_genomewide: no visible binding for global variable ‘z’
+mugent_genomewide: no visible global function definition for ‘select’
+mugent_genomewide: no visible global function definition for ‘rename’
+mugent_genomewide : <anonymous>: no visible binding for global variable
+  ‘z’
+mugent_genomewide: no visible binding for global variable ‘.’
+mugent_genomewide: no visible global function definition for
+  ‘bind_cols’
+mugent_ph: no visible global function definition for ‘pgamma’
+mugent_pleio: no visible global function definition for ‘qchisq’
+multipop_anova: no visible global function definition for ‘pchisq’
+penmu: no visible global function definition for ‘qnorm’
+penmu: no visible global function definition for ‘dmvn’
+wgent_genomewide: no visible global function definition for ‘data’
+wgent_genomewide: no visible binding for global variable
+  ‘EnsemblHg19GenePos’
+wgent_genomewide: no visible binding for global variable
+  ‘EnsemblHg38GenePos’
+wgent_genomewide: no visible global function definition for ‘%>%’
+wgent_genomewide: no visible global function definition for ‘sym’
+wgent_genomewide: no visible global function definition for ‘na.omit’
+wgent_genomewide: no visible global function definition for ‘rename’
+wgent_genomewide: no visible global function definition for ‘select’
+wgent_genomewide: no visible binding for global variable ‘chr’
+wgent_genomewide: no visible global function definition for ‘pull’
+wgent_genomewide: no visible global function definition for ‘filter’
+wgent_genomewide: no visible binding for global variable ‘ngenes’
+wgent_genomewide: no visible global function definition for
+  ‘flush.console’
+wgent_genomewide: no visible binding for global variable ‘symbol’
+wgent_genomewide: no visible binding for global variable ‘start’
+wgent_genomewide: no visible global function definition for ‘head’
+wgent_genomewide: no visible binding for global variable ‘.’
+wgent_genomewide: no visible binding for global variable ‘end’
+wgent_genomewide: no visible binding for global variable ‘V1’
+wgent_genomewide: no visible binding for global variable ‘V2’
+wgent_genomewide: no visible binding for global variable ‘rsid’
+wgent_genomewide: no visible global function definition for ‘distinct’
+wgent_genomewide: no visible global function definition for ‘arrange’
+wgent_genomewide: no visible global function definition for ‘left_join’
+wgent_genomewide: no visible global function definition for ‘mutate’
+wgent_genomewide: no visible binding for global variable ‘a1’
+wgent_genomewide: no visible binding for global variable ‘weight’
+wgent_genomewide: no visible global function definition for ‘as_tibble’
+Undefined global functions or variables:
+  %>% . := AFRGenTStatLD AMRGenTStatLD EASGenTStatLD EURGenTStatLD
+  EnsemblHg19GenePos EnsemblHg38GenePos Q SASGenTStatLD V1 V2 a a1 aes
+  arrange as_tibble bind_cols chr chrcol d data dgamma distinct dmvn e
+  effect_allele element_blank end filter finemapping_CS finemapping_pip
+  flush.console gene geom_abline geom_hline geom_point geom_text_repel
+  ggplot head labs left_join locus_index_gene median mutate na.omit
+  newbp ngenes o pchisq pgamma position ppoints pull qchisq qgamma
+  qnorm r2 rate rename rsid scale_color_manual scale_x_continuous
+  select shape start sym symbol theme theme_bw weight write.table z
+Consider adding
+  importFrom("stats", "dgamma", "end", "filter", "median", "na.omit",
+             "pchisq", "pgamma", "ppoints", "qchisq", "qgamma", "qnorm",
+             "start")
+  importFrom("utils", "data", "flush.console", "head", "write.table")
+to your NAMESPACE file.
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Undocumented arguments in Rd file 'gene_clump.Rd'
+  ‘gene_symbol’
+
+Undocumented arguments in Rd file 'gent_finemap.Rd'
+  ‘...’
+
+Undocumented arguments in Rd file 'ld.Rd'
+  ‘chromosome’ ‘need_bim’ ‘temp_file_prefix’
+
+Undocumented arguments in Rd file 'mugent_genomewide.Rd'
+  ‘gwas_list’
+Documented arguments not in \usage in Rd file 'mugent_genomewide.Rd':
+  ‘gwas’
+
+Undocumented arguments in Rd file 'mugent_sel.Rd'
+  ‘verbose’
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... ERROR
+Warning: parse error in file 'lines':
+9: unexpected string constant
+321:   ld_directory = 'ld_matrices',
+322:   build 'grch37'
+             ^
+** will not attempt to run examples
+* checking contents of ‘data’ directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking examples ... SKIPPED
+* checking for unstated dependencies in ‘tests’ ... OK
+* checking tests ... OK
+  Running ‘testthat.R’
+* DONE
+Status: 1 ERROR, 2 WARNINGs, 3 NOTEs

@@ -5,16 +5,16 @@
 \alias{EnsemblHg38GenePos}
 \title{Ensembl hg38 coordinates of gene start and end base pair positions}
 \format{
-Each row in this data set is a pair of HGNC gene symbols and Ensembl IDs. Their chromosomes, start, end, and base pair midpoint positions are provided
+Each row in this data set is a unique pair of HGNC gene symbols and Ensembl IDs. Their chromosomes, start, end, and base pair midpoint positions are provided
 }
 \source{
 Ensembl hg38 coordinates downloaded from the Biomart web tool.
 }
 \usage{
-EnsemblHg19GenePos
+EnsemblHg38GenePos
 }
 \description{
-Each row in this data set is a pair of HGNC gene symbols and Ensembl IDs. Their chromosomes, start, end, and base pair midpoint positions are provided.
+Each row in this data set is a unique pair of HGNC gene symbols and Ensembl IDs. Their chromosomes, start, end, and base pair midpoint positions are provided.
 }
 \examples{
 data(EnsemblHg38GenePos)
