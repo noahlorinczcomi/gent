@@ -35,10 +35,14 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libglpk-dev libxml2-dev
+
       - name: Install macOS system dependencies
         if: runner.os == 'macOS'
         run: |
-          brew install gettext
+          brew install gettext glpk
           echo "CPPFLAGS=-I$(brew --prefix gettext)/include" >> $GITHUB_ENV
           echo "LDFLAGS=-L$(brew --prefix gettext)/lib" >> $GITHUB_ENV
           mkdir -p ~/.R
