@@ -34,6 +34,11 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
+      - name: Disable renv
+        run: |
+          echo "RENV_CONFIG_AUTOLOAD_ENABLED=FALSE" >> $GITHUB_ENV
+          rm -f renv.lock
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
