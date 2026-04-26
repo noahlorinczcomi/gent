@@ -16,13 +16,12 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest, r: '4.4'}
-          - {os: macos-latest,  r: '4.4'}
+          - {os: ubuntu-latest, r: 'release'}
+          - {os: macos-latest,  r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-      # Do not require optional (Suggests) packages to be installed
       _R_CHECK_FORCE_SUGGESTS_: false
 
     steps:
@@ -34,20 +33,6 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-
-      - name: Install Linux system dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libglpk-dev libxml2-dev
-
-      - name: Install macOS system dependencies
-        if: runner.os == 'macOS'
-        run: |
-          brew install gettext glpk
-          echo "CPPFLAGS=-I$(brew --prefix gettext)/include" >> $GITHUB_ENV
-          echo "LDFLAGS=-L$(brew --prefix gettext)/lib" >> $GITHUB_ENV
-          mkdir -p ~/.R
-          echo "CPPFLAGS=-I$(brew --prefix gettext)/include" >> ~/.R/Makevars
-          echo "LDFLAGS=-L$(brew --prefix gettext)/lib" >> ~/.R/Makevars
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
