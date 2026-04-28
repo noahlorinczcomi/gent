@@ -669,6 +669,7 @@ mugent_genomewide=function(
 #' @param R_ridge_penalty Ridge penalty to add to gene-gene correlation matrix
 #' @param clump_p P-value threshold to use when finding loci in which to perform fine-mapping (only invoked if \code{index_genes} is NULL)
 #' @param clump_r2 Gene-gene squared correlation upper threshold to use when finding loci in which to perform fine-mapping (only envoked if \code{index_genes} is NULL). Genes correlated below the square root of this threshold will be considered as tagging separate loci.
+#' @param susie_L ``L`` param in ``susieR::susie_rss()``; the number of credible sets to allow. Capped at the number of tested variants.
 #' @param verbose TRUE if progress should be printed to the console, FALSE otherwise
 #' @param index Gene index file. see \code{data(EnsemblHg19GenePos)} for the expected format.
 #' @return A dataframe with these components:
@@ -706,6 +707,7 @@ gent_finemap=function(
     R_ridge_penalty=0,
     clump_p=0.05/12727,
     clump_r2=0.01,
+    susie_L=10,
     verbose=TRUE,
     index=NULL, ...) { # ...'s are for susieR::susie_rss()
   ## steps:
@@ -776,7 +778,8 @@ gent_finemap=function(
     if(m<2) next
     gent_ldi=(1-R_ridge_penalty)*gent_ldi+R_ridge_penalty*diag(m)
     # apply fine-mapping here
-    fit=suppressWarnings(susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,verbose=FALSE,...))
+    L=min(c(nrow(gent_ldi), susie_L))
+    fit=suppressWarnings(susieR::susie_rss(z=gent_resultsi$a,R=gent_ldi,n=gwas_n,L=susie_L,verbose=FALSE,...))
     # assign credible sets to each SNP
     cs=rep(NA,m)
     if(!is.null(fit$sets$cs)) for(o in 1:length(fit$sets$cs)) cs[fit$sets$cs[[o]]]=o
