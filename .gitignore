@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+*.Rcheck/
+*.tar.gz
+*.tgz
+renv.lock

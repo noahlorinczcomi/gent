@@ -1,2 +1,15 @@
+^renv$
+^renv\.lock$
+^\.Rprofile$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^cli
+^example_data
+^overview_images
+^wiki_images
+^LD\.fetch
+^genomewide\.R$
+^inprogress_genome_wide_functions\.r$
+^CONTRIBUTING\.md$
+^\.github
+^\.pixi

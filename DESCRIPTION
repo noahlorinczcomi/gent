@@ -9,3 +9,15 @@ License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Imports:
+    data.table,
+    dplyr,
+    ggplot2,
+    mvnfast,
+    tibble,
+    tidyr
+Suggests:
+    ggrepel,
+    susieR,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

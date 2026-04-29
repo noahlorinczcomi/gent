@@ -8,6 +8,7 @@ mugent_genomewide(
   gwas_list,
   ld_population_list,
   ld_directory = "ld_directory",
+  build = "grch37",
   KbWindow = 50,
   snp_list = lapply(1:length(gwas_list), "rsid"),
   chromosome_list = lapply(1:length(gwas_list), "chr"),
@@ -24,6 +25,8 @@ mugent_genomewide(
 \item{ld_population_list}{List of LD populations (see Github Wiki)}
 
 \item{ld_directory}{Relative or absolute filepath to LD directory (see Github Wiki)}
+
+\item{build}{genomic build of your GWAS data. One of hg19, hg38, grch37, grch38 (case insensitive)}
 
 \item{KbWindow}{Kilobase window used to assign SNPs to genes}
 
@@ -91,6 +94,7 @@ mugent_genomewide(
   gwas_list = list(EUR=eur_gwas, AFR=afr_gwas),
   ld_population_list = list(EUR='EUR', AFR='AFR'),
   ld_directory = 'ld_matrices',
+  build 'grch37',
   KbWindow = 50,
   snp_list = list(EUR='rsid', AFR='rsid'),
   chromosome_list = list(EUR='#CHR', AFR='#CHR'),
