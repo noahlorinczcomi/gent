@@ -3,6 +3,18 @@
 > [!NOTE]
 > `gent` can be run from the command line using the [`cli/`](cli/) repo. Follow the [link](cli/) for more details.
 
+## TL;DR
+
+```R
+library(gent)
+LD_matrix = 0.5^toeplitz(0:9)
+z = MASS::mvrnorm(n=1, mu=rep(0,10), Sigma=LD_matrix)
+result = gent(
+    zs=z,  # vector of variant Z-statistics
+    LD=LD_matrix              # LD correlated matrix allele-harmonized to ``z_statistics_vector`` 
+)
+```
+
 ## Summary
 The methods contained in this R package test the association between a set of SNPs and a phenotype. These methods only require GWAS summary statistics and an LD reference panel. If you are performing xGenT (xQTL-weighted gene-based testing), you also need xQTL effect sizes. When SNP sets are gene-specific (e.g., containing SNPs near a gene), we refer to our set of methods as 'gene-based association' tests. 
 
