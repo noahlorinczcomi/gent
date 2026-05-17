@@ -1,5 +1,8 @@
 [![DOI](https://zenodo.org/badge/839937647.svg)](https://doi.org/10.5281/zenodo.17449854)
 
+> [!NOTE]
+> `gent` can be run from the command line using the [`cli/`](cli/) repo. Follow the [link](cli/) for more details.
+
 ## Summary
 The methods contained in this R package test the association between a set of SNPs and a phenotype. These methods only require GWAS summary statistics and an LD reference panel. If you are performing xGenT (xQTL-weighted gene-based testing), you also need xQTL effect sizes. When SNP sets are gene-specific (e.g., containing SNPs near a gene), we refer to our set of methods as 'gene-based association' tests. 
 
