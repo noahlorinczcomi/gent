@@ -11,7 +11,7 @@ LD_matrix = 0.5^toeplitz(0:9)
 z = MASS::mvrnorm(n=1, mu=rep(0,10), Sigma=LD_matrix)
 result = gent(
     zs=z,         # vector of variant Z-statistics
-    LD=LD_matrix  # LD correlated matrix allele-harmonized to ``z_statistics_vector`` 
+    LD=LD_matrix  # LD correlation matrix allele-harmonized to ``z_statistics_vector`` 
 )
 ```
 
