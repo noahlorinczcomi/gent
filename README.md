@@ -6,8 +6,6 @@
 ## Summary
 The methods contained in this R package test the association between a set of SNPs and a phenotype. These methods only require GWAS summary statistics and an LD reference panel. If you are performing xGenT (xQTL-weighted gene-based testing), you also need xQTL effect sizes. When SNP sets are gene-specific (e.g., containing SNPs near a gene), we refer to our set of methods as 'gene-based association' tests. 
 
-[Our preprint](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5080346)
-
 [Pre-computed results for 50+ phenotypes (Shiny app)](https://nlorinczcomi.shinyapps.io/gent/)
 
 ## R installation
@@ -29,3 +27,6 @@ Jump to examples for testing **genome-wide**:
 * [MuGenT + Post-hoc Heterogeneity and Pleiotropy tests](https://github.com/noahlorinczcomi/gent/wiki/Genome%E2%80%90wide-MuGenT-&--post%E2%80%90hoc-tests) `gent::mugent_genomewide()`
 * [Fine-mapping gene-based test statistics](https://github.com/noahlorinczcomi/gent/wiki/Fine%E2%80%90mapping-gene-statistics) `gent::gent_finemap()`
 
+# References
+
+- Lorincz-Comi, N., Song, W., Chen, X., Paz, I. R., Hou, Y., Zhou, Y., ... & Cheng, F. (2026). Combining xQTL and genome-wide association studies from diverse populations improves druggable gene discovery. Nature Communications.
