@@ -66,7 +66,8 @@ if (test_type == "gent") {
     verbose        = opt$verbose
   )
 
-  write_results(results, opt$out, "gent")
+  path_out = normalizePath(opt$out, mustWork = FALSE)
+  write_results(results, path_out, "gent")
 }
 
 # ── Run MuGenT (multi-trait/ancestry genome-wide) ─────────────────────────────
@@ -108,5 +109,6 @@ if (test_type == "mugent") {
     verbose              = opt$verbose
   )
 
-  write_results(results, opt$out, "mugent")
+  path_out = normalizePath(opt$out, mustWork = FALSE)
+  write_results(results, path_out, "mugent")
 }

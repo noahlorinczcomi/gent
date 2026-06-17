@@ -22,7 +22,7 @@ option_list <- list(
     help = "Genomic build of the GWAS data: grch37 (hg19) or grch38 (hg38) [default: %default]"
   ),
   make_option(
-    c("--kb-window"), type = "integer", default = 50,
+    c("--kb-window"), type = "integer", default = 20,
     help = "Kilobase window added around each gene boundary when assigning SNPs [default: %default]"
   ),
   make_option(
