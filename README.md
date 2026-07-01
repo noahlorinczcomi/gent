@@ -1,5 +1,7 @@
 [![DOI](https://zenodo.org/badge/839937647.svg)](https://doi.org/10.5281/zenodo.17449854)
 
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=0BB600&width=435&lines=gent%3A+gene-based+association+testing)](https://git.io/typing-svg)
+
 > [!NOTE]
 > `gent` can be run from the command line using the [`cli/`](cli/) repo. Follow the [link](cli/) for more details.
 
